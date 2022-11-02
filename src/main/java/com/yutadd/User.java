@@ -1,8 +1,7 @@
 package com.yutadd;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import  javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -21,8 +20,7 @@ public class User {
 	private String name;
 	@Id
 	@Column(unique=true)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long UserID;
+	private String UserID;
 	@NotBlank
 	private String password;
 	private String birth;

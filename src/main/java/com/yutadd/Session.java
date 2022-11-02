@@ -1,5 +1,6 @@
 package com.yutadd;
 
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -16,7 +17,7 @@ import lombok.Setter;
 @Setter
 public class Session {
 @NotBlank
-private Long UserID;
+private String UserID;
 @Id
 private String sessionID;
 }
