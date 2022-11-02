@@ -1,11 +1,9 @@
 package com.yutadd;
-import java.time.LocalDate;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import  javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
@@ -22,14 +20,13 @@ public class User {
 	@NotBlank
 	private String name;
 	@Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userid_seq")
-    @SequenceGenerator(name = "userid_seq", sequenceName = "userid_seq", allocationSize = 1)
-	private Long ID;
+	@Column(unique=true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long UserID;
 	@NotBlank
 	private String password;
-	private String[] sessionIDs;
+	private String birth;
 	@NotBlank
-	private LocalDate birth;
-	@NotBlank
+	@Column(unique=true)
 	private String email;
 }

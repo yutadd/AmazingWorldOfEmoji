@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yutadd.repository.SessionRepository;
 import com.yutadd.repository.UserRepository;
 
 @RestController
@@ -16,6 +17,8 @@ public class PostController {
 	
 	@Autowired
 	private UserRepository repository;
+	@Autowired
+	SessionRepository srepository;
 	/**
 	 * @apiNote 
 	 * Post message.<br />
@@ -30,12 +33,13 @@ public class PostController {
 	@RequestMapping(value="/api/registration", method=RequestMethod.POST)
 	public void registration(@RequestParam("name") String name,@RequestParam("session") String sessionID,@RequestParam("password") String password,@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)@RequestParam("birth") LocalDate birth,@RequestParam("email") String email) {
 		User u=new User();
-		String[] s= {sessionID};
 		u.setName(name);
 		u.setPassword(password);
 		u.setEmail(email);
-		u.setSessionIDs(s);
-		u.setBirth(birth);
+		u.setBirth(birth.toString());
 		repository.save(u);
+		Session se=new Session();
+		se.getUserID();
+		se.setSessionID(sessionID);
 	}
 }
