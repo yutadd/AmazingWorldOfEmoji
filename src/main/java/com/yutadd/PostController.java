@@ -1,7 +1,9 @@
 package com.yutadd;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,8 +28,14 @@ public class PostController {
 		System.out.println(message);
 	}
 	@RequestMapping(value="/api/registration", method=RequestMethod.POST)
-	public void registration(@Validated User user) {
-		repository.save(user);
+	public void registration(@RequestParam("name") String name,@RequestParam("session") String sessionID,@RequestParam("password") String password,@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)@RequestParam("birth") LocalDate birth,@RequestParam("email") String email) {
+		User u=new User();
+		String[] s= {sessionID};
+		u.setName(name);
+		u.setPassword(password);
+		u.setEmail(email);
+		u.setSessionIDs(s);
+		u.setBirth(birth);
+		repository.save(u);
 	}
-
 }
