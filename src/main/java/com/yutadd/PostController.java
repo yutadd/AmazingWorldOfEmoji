@@ -6,12 +6,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.yutadd.repository.Repository;
+
+import com.yutadd.repository.UserRepository;
 
 @RestController
-public class Controller {
+public class PostController {
+	
 	@Autowired
-	private Repository repository;
+	private UserRepository repository;
 	/**
 	 * @apiNote 
 	 * Post message.<br />

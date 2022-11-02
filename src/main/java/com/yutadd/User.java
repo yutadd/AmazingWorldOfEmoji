@@ -1,15 +1,16 @@
 package com.yutadd;
 import java.util.Date;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import  javax.persistence.Id;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
-import org.springframework.data.annotation.Id;
-
 import lombok.AllArgsConstructor;
-import lombok.Data;
-@Data
+@Entity
+@Table(name="UserTable")
 @AllArgsConstructor
 public class User {
 	@NotBlank
