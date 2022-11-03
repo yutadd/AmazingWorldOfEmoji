@@ -21,9 +21,9 @@ import lombok.Setter;
 	@Setter
 public class Comment {
 	@NotBlank
-	private String UserID;
+	private String userID;
 	@NotBlank
-	private String UserName;
+	private String userName;
 	@Id
 	@Column(unique=true)
 	private String commentID;

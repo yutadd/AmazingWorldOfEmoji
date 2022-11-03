@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 public class SessionID {
 @NotBlank
-private String UserID;
+private String userID;
 @Id
 private String sessionID;
 }

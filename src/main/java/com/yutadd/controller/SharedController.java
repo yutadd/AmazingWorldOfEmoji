@@ -1,6 +1,9 @@
 package com.yutadd.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
@@ -16,6 +19,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +30,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.yutadd.model.Comment;
+import com.yutadd.model.Emoji;
 import com.yutadd.repository.CommentRepository;
+import com.yutadd.repository.EmojiRepository;
 import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionIDRepository;
 import com.google.gson.Gson;
@@ -36,7 +43,9 @@ import com.yutadd.repository.UserRepository;
 
 @Controller
 @RequestMapping(value="/api/share/")
-public class SharedController {
+public class SharedController extends ResponseEntityExceptionHandler {
+	@Autowired
+	private EmojiRepository erepository;
 	@Autowired
 	private UserRepository urepository;
 	@Autowired
@@ -68,19 +77,43 @@ public class SharedController {
 		System.out.println(json);
 		return json;
 	}
-	
+	/*yutadd.yeah*/
+	@RequestMapping(value="/get/emoji",method=RequestMethod.GET)
+	@ResponseBody
+	public byte[] emojiImage(@RequestParam("emoji")String emojiPath,@RequestParam("type")String type) {
+		try {
+			String[] str1=emojiPath.split("@");
+			FileInputStream fis=new FileInputStream(new File(str1[0]+File.separator+str1[1]+"."+type));
+			return IOUtils.toByteArray(fis);
+		}catch(Exception e) {
+			e.printStackTrace();
+			return "404".getBytes();
+		}
+	}
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
-	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session) {
+	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {
 		if(srepository.existsById(session.getId())) {
 			if(title.matches("[a-z]*[A-Z]*")) {
-				Path filePath=Paths.get(srepository.findById(session.getId())+File.separator+title);
 				try {
-					OutputStream output=Files.newOutputStream(filePath);
+					String pstr=srepository.findById(session.getId()).get().getUserID().replace("@","");
+					Path path=Paths.get(pstr);
+					File file=new File(pstr+File.separator+title+"."+type);
+					Files.createDirectories(path);
+					//f.createNewFile();
+					OutputStream output=new FileOutputStream(file);
 					output.write(imageFile.getBytes());
 					output.flush();
+					output.close();
+					Emoji emoji=new Emoji();
+					emoji.setPopularity(0);
+					emoji.setType(type);
+					emoji.setTitle(title);
+					emoji.setUserID(srepository.findById(session.getId()).get().getUserID());
+					erepository.save(emoji);
 					return new ResponseEntity<>(HttpStatus.ACCEPTED);
 				} catch (IOException e) {
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getLocalizedMessage());
+					e.printStackTrace();
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ERROR on doing"+e.getLocalizedMessage());
 				}
 			}else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("タイトルに不正な値が入っています。");
