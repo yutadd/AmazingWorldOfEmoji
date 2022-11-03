@@ -1,10 +1,8 @@
-package com.yutadd;
-
+package com.yutadd.model;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +13,8 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 @Setter
-public class Session {
-@NotBlank
-private String UserID;
+public class Like {
 @Id
-private String sessionID;
+private String UserID;
+private String commentID;
 }
