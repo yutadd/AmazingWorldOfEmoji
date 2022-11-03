@@ -7,6 +7,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Random;
@@ -18,9 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yutadd.model.Comment;
@@ -34,7 +38,7 @@ import com.yutadd.repository.UserRepository;
 @RequestMapping(value="/api/share/")
 public class SharedController {
 	@Autowired
-	private UserRepository repository;
+	private UserRepository urepository;
 	@Autowired
 	private SessionIDRepository srepository;
 	@Autowired
@@ -42,17 +46,23 @@ public class SharedController {
 	@Autowired
 	private LikeRepository lrepository;
 	@RequestMapping(value="/post/message", method=RequestMethod.POST)
-	public ResponseEntity<String> addEmoji(@RequestParam("message") String message,HttpSession session) {
+	public ResponseEntity<String> addComment(@RequestParam("message") String message,HttpSession session) {
 		String uid=srepository.findById(session.getId()).get().getUserID();
 		Random rn = new Random();
 		BigInteger cID= new BigInteger(255,rn);
-		Comment c=new Comment(uid,cID.toString(16) , message, LocalDate.now());
+		Comment c=new Comment();
+		c.setUserID(uid);
+		c.setCommentID(cID.toString(16));
+		c.setText(message);
+		c.setUserName(urepository.findById(uid).get().getName());
+		c.setTime(Date.valueOf(LocalDate.now()));
 		crepository.save(c);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	@RequestMapping(value="/get/posts/",method=RequestMethod.GET)
+	@RequestMapping(value="/get/posts",method=RequestMethod.GET)
+	@ResponseBody
 	public String getNewPosts(HttpSession session) {
-		Set<Comment> newComments=crepository.findRecently(LocalDate.now().minusDays(1));
+		Set<Comment> newComments=crepository.findRecently(Date.valueOf(LocalDate.now().minusDays(1)));
 		Gson gson = new Gson();
 		String json = gson.toJson(newComments);
 		System.out.println(json);

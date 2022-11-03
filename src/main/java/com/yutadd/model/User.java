@@ -1,5 +1,7 @@
 package com.yutadd.model;
 
+import java.sql.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import  javax.persistence.Id;
@@ -23,7 +25,7 @@ public class User {
 	private String UserID;
 	@NotBlank
 	private String password;
-	private String birth;
+	private Date birth;
 	@NotBlank
 	@Column(unique=true)
 	private String email;

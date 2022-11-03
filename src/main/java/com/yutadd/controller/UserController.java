@@ -1,5 +1,6 @@
 package com.yutadd.controller;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 import javax.servlet.http.HttpSession;
@@ -18,7 +19,6 @@ import com.yutadd.model.SessionID;
 import com.yutadd.model.User;
 import com.yutadd.repository.SessionIDRepository;
 import com.yutadd.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @RestController
@@ -42,7 +42,7 @@ public class UserController {
 				u.setName(name);
 				u.setPassword(new BCryptPasswordEncoder().encode(password));
 				u.setEmail(email);
-				u.setBirth(birth.toString());
+				u.setBirth(Date.valueOf(birth));
 				repository.save(u);
 				SessionID se=new SessionID();
 				se.setUserID(uID);
