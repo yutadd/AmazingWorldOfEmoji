@@ -12,6 +12,6 @@ import com.yutadd.model.Comment;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, String>{
-	@Query(value = "select * from comments where time > %:time%;",nativeQuery = true) 
-	List<Comment> findRecently(@Param("time")Date time);
+	@Query(value = "select c from Comment c where c.time > ?1")
+	public List<Comment> findComment(@Param("time")Date time);
 }

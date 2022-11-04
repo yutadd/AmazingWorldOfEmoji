@@ -22,5 +22,7 @@ public class Emoji {
 	private String title;
 	@NotBlank
 	private String type;
+	@NotBlank
+	private String path;
 	private long popularity;
 }

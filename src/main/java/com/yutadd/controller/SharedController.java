@@ -53,6 +53,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	private LikeRepository lrepository;
 	@RequestMapping(value="/post/message", method=RequestMethod.POST)
 	public ResponseEntity<String> addComment(@RequestParam("message") String message,HttpSession session) {
+		try {
 		String uid=srepository.findById(session.getId()).get().getUserID();
 		Random rn = new Random();
 		BigInteger cID= new BigInteger(255,rn);
@@ -64,14 +65,16 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		c.setTime(Date.valueOf(LocalDate.now()));
 		crepository.save(c);
 		return new ResponseEntity<>(HttpStatus.OK);
+		}catch(Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください");
+		}
 	}
 	@RequestMapping(value="/get/posts",method=RequestMethod.GET)
 	@ResponseBody
 	public String getNewPosts(HttpSession session) {
-		List<Comment> newComments=crepository.findRecently(Date.valueOf(LocalDate.now().minusDays(1)));
+		List<Comment> newComments=crepository.findComment(Date.valueOf(LocalDate.now().minusDays(1)));
 		Gson gson = new Gson();
 		String json = gson.toJson(newComments);
-		System.out.println(json);
 		return json;
 	}
 	/*yutadd.yeah*/
@@ -97,14 +100,22 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		List<String> users=urepository.findUsers(name+"%");
 		return new Gson().toJson(users);
 	}
+	@RequestMapping(value="/get/searchemoji",method=RequestMethod.GET)
+	@ResponseBody
+	public String searchEmoji(@RequestParam("path")String path) {
+		List<Emoji> emojis=erepository.findEmoji(path+"%");
+		return new Gson().toJson(emojis);
+	}
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {
+		
 		if(srepository.existsById(session.getId())) {
 			if(title.matches("[a-z]*[A-Z]*")) {
 				try {
-					String pstr=srepository.findById(session.getId()).get().getUserID().replace("@","");
-					Path path=Paths.get(pstr);
-					File file=new File(pstr+File.separator+title+"."+type);
+					String uid=srepository.findById(session.getId()).get().getUserID();
+					String replacesuid=uid.replace("@","");
+					Path path=Paths.get(replacesuid);
+					File file=new File(replacesuid+File.separator+title+"."+type);
 					Files.createDirectories(path);
 					//f.createNewFile();
 					OutputStream output=new FileOutputStream(file);
@@ -115,7 +126,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 					emoji.setPopularity(0);
 					emoji.setType(type);
 					emoji.setTitle(title);
-					emoji.setUserID(srepository.findById(session.getId()).get().getUserID());
+					emoji.setUserID(uid);
+					emoji.setPath(replacesuid+"."+title);
 					erepository.save(emoji);
 					return new ResponseEntity<>(HttpStatus.ACCEPTED);
 				} catch (IOException e) {
