@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 @Entity
-@Table(name="UserTable")
+@Table(name="users")
 @RequiredArgsConstructor
 @Getter
 

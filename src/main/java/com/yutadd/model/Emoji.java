@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="Emoji")
+@Table(name="emojis")
 @RequiredArgsConstructor
 @Getter
 @Setter

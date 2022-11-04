@@ -2,7 +2,6 @@ package com.yutadd.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,11 +10,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
-import java.sql.Time;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpSession;
 
@@ -24,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,13 +29,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.google.gson.Gson;
 import com.yutadd.model.Comment;
 import com.yutadd.model.Emoji;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
 import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionIDRepository;
-import com.google.gson.Gson;
 import com.yutadd.repository.UserRepository;
 
 @Controller
@@ -71,7 +68,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value="/get/posts",method=RequestMethod.GET)
 	@ResponseBody
 	public String getNewPosts(HttpSession session) {
-		Set<Comment> newComments=crepository.findRecently(Date.valueOf(LocalDate.now().minusDays(1)));
+		List<Comment> newComments=crepository.findRecently(Date.valueOf(LocalDate.now().minusDays(1)));
 		Gson gson = new Gson();
 		String json = gson.toJson(newComments);
 		System.out.println(json);
@@ -82,13 +79,23 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@ResponseBody
 	public byte[] emojiImage(@RequestParam("emoji")String emojiPath,@RequestParam("type")String type) {
 		try {
-			String[] str1=emojiPath.split("@");
+			String[] str1=emojiPath.split(Pattern.quote("."));
 			FileInputStream fis=new FileInputStream(new File(str1[0]+File.separator+str1[1]+"."+type));
 			return IOUtils.toByteArray(fis);
 		}catch(Exception e) {
 			e.printStackTrace();
 			return "404".getBytes();
 		}
+	}
+	/*
+	 * yutadd.yeah
+	* 絵文字の検索はユーザーの検索とユーザーから絵文字を絞り込む検索をすれば取得できる。
+	* */
+	@RequestMapping(value="/get/searchuser",method=RequestMethod.GET)
+	@ResponseBody
+	public String searchUser(@RequestParam("name")String name) {
+		List<String> users=urepository.findUsers(name+"%");
+		return new Gson().toJson(users);
 	}
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {

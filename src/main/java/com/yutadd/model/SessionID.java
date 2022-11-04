@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="Session")
+@Table(name="sessions")
 @RequiredArgsConstructor
 @Getter
 @Setter
