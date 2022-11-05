@@ -30,8 +30,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.google.gson.Gson;
-import com.yutadd.model.Comment;
-import com.yutadd.model.Emoji;
+import com.yutadd.model.CommentDetail;
+import com.yutadd.model.entity.Comment;
+import com.yutadd.model.entity.Emoji;
+import com.yutadd.model.entity.Like;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
 import com.yutadd.repository.LikeRepository;
@@ -52,7 +54,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@Autowired
 	private LikeRepository lrepository;
 	@RequestMapping(value="/post/message", method=RequestMethod.POST)
-	public ResponseEntity<String> addComment(@RequestParam("message") String message,HttpSession session) {
+	public ResponseEntity<String> addComment(@RequestParam("message")String message,HttpSession session) {
 		try {
 		String uid=srepository.findById(session.getId()).get().getUserID();
 		Random rn = new Random();
@@ -61,7 +63,6 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		c.setUserID(uid);
 		c.setCommentID(cID.toString(16));
 		c.setText(message);
-		c.setUserName(urepository.findById(uid).get().getName());
 		c.setTime(Date.valueOf(LocalDate.now()));
 		crepository.save(c);
 		return new ResponseEntity<>(HttpStatus.OK);
@@ -69,9 +70,28 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください");
 		}
 	}
-	@RequestMapping(value="/get/posts",method=RequestMethod.GET)
+	@RequestMapping(value="/post/like",method=RequestMethod.POST)
 	@ResponseBody
-	public String getNewPosts(HttpSession session) {
+	public void getNewPosts(HttpSession session,@RequestParam("cid")String cid) {
+		Like l=new Like();
+		l.setCommentID(cid);
+		l.setUserID(srepository.findById(session.getId()).get().getUserID());
+		lrepository.save(l);
+	}
+	@RequestMapping(value="/get/commentdetail",method=RequestMethod.GET)
+	@ResponseBody
+	public String getCommentDetail(HttpSession session,@RequestParam("cid")String cid) {
+		CommentDetail cd=new CommentDetail();
+		Comment c=crepository.findById(cid).get();
+		String uid=c.getUserID();
+		cd.setComment(c);
+		cd.setLikeAmount(lrepository.countById(cid));
+		cd.setUserName(urepository.findById(uid).get().getName());
+		return new Gson().toJson(cd);
+	}
+	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
+	@ResponseBody
+	public String getNewComments(HttpSession session) {
 		List<Comment> newComments=crepository.findComment(Date.valueOf(LocalDate.now().minusDays(1)));
 		Gson gson = new Gson();
 		String json = gson.toJson(newComments);
@@ -108,7 +128,6 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	}
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {
-		
 		if(srepository.existsById(session.getId())) {
 			if(title.matches("[a-z]*[A-Z]*")) {
 				try {

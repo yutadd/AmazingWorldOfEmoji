@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.yutadd.model.User;
+import com.yutadd.model.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String>{

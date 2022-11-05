@@ -1,4 +1,4 @@
-package com.yutadd.model;
+package com.yutadd.model.entity;
 
 
 import javax.persistence.Entity;

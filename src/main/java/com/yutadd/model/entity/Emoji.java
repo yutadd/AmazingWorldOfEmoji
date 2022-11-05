@@ -1,5 +1,4 @@
-package com.yutadd.model;
-
+package com.yutadd.model.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -11,13 +10,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="sessions")
+@Table(name="emojis")
 @RequiredArgsConstructor
 @Getter
 @Setter
-public class SessionID {
-@NotBlank
-private String userID;
-@Id
-private String sessionID;
+public class Emoji {
+	@NotBlank
+	private String userID;
+	@Id
+	@NotBlank
+	private String title;
+	@NotBlank
+	private String type;
+	@NotBlank
+	private String path;
+	private long popularity;
 }

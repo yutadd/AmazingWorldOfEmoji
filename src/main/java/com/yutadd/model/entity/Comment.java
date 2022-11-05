@@ -1,32 +1,28 @@
-package com.yutadd.model;
+package com.yutadd.model.entity;
 
 import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import  javax.persistence.Id;
+import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-@Entity
-@Table(name="users")
-@RequiredArgsConstructor
-@Getter
-
-@Setter
-public class User {
+	@Entity
+	@Table(name="comments")
+	@RequiredArgsConstructor
+	@Getter
+	@Setter
+public class Comment {
 	@NotBlank
-	private String name;
+	private String userID;
 	@Id
 	@Column(unique=true)
-	private String UserID;
+	private String commentID;
 	@NotBlank
-	private String password;
-	private Date birth;
-	@NotBlank
-	@Column(unique=true)
-	private String email;
+	private String text;
+	private Date time;
 }

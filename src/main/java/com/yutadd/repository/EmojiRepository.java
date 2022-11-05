@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.yutadd.model.Emoji;
+import com.yutadd.model.entity.Emoji;
 
 @Repository
 public interface EmojiRepository extends JpaRepository<Emoji,String> {

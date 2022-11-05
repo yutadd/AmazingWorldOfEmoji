@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yutadd.model.SessionID;
-import com.yutadd.model.User;
+import com.yutadd.model.entity.SessionID;
+import com.yutadd.model.entity.User;
 import com.yutadd.repository.SessionIDRepository;
 import com.yutadd.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
