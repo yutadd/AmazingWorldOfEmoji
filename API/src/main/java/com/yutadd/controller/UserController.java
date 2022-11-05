@@ -30,7 +30,11 @@ public class UserController {
 	@Autowired
 	private SessionIDRepository srepository;
 
-
+@RequestMapping(value="/get/logged",method=RequestMethod.GET)
+@ResponseBody
+public String isLogged(HttpSession session) {
+	return (srepository.existsById(session.getId()))?"true":"false";
+}
 	@RequestMapping(value="/post/registration", method=RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String> registration(HttpSession session,@RequestParam("name") String name,@RequestParam("UserID") String uID,@RequestParam("password") String password,@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)@RequestParam("birth") LocalDate birth,@RequestParam("email") String email) {

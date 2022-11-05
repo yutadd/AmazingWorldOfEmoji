@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App';
+import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
+  
   document.getElementById('root') as HTMLElement
 );
 root.render(
@@ -12,8 +13,10 @@ root.render(
     <App />
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// https://bit.ly/CRA-vitals
+reportWebVitals(console.log);
+/*最初の1バイトを受信するまでの時間 / Time to First Byte (TTFB)
+最初の DOM をレンダリングするまでの時間 / First Contentful Paint (FCP)
+表示される最も大きい要素のレンダリング時間 / Largest Contentful Paint (LCP)
+ユーザー操作をブラウザが処理を開始するまでの時間 / First Input Delay (FID)
+予期しないレイアウトシフトの最大値 / Cumulative Layout Shift (CLS)*/ 
