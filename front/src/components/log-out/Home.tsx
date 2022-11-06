@@ -24,16 +24,20 @@ export default function Home2() {
         renderInput={(params) => (
           <TextField {...params} label="clearOnEscape" variant="standard" />
         )}
-        onInputChange={(e,text) => {
-            fetch("/api/share/get/searchemoji?path="+text,{mode:'cors'}).then(result=>{
-                result.json().then((json)=>{
-                    var ar=[];
-                    for(var i=0;i<json.length;i++){
-                        ar.push(json[i]["path"])
-                    }
-                    setAssist(ar);
+        onInputChange={(e,value) => {
+            setAssist([""]);
+            setText(value);
+            if(value!=""){
+                fetch("/api/share/get/searchemoji?path="+value,{mode:'cors'}).then(result=>{
+                    result.json().then((json)=>{
+                        var ar=[];
+                        for(var i=0;i<json.length;i++){
+                            ar.push(json[i]["path"])
+                        }
+                        setAssist(ar);
+                    });
                 });
-            });
+            }
         }}
     />
         
