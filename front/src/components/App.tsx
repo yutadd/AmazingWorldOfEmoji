@@ -1,7 +1,6 @@
 import React, { useState,useEffect } from 'react';
-import logo from './logo.svg';
 import {Home1} from './logged-in/Home';
-import {Home2} from './log-out/Home';
+import Home2 from './log-out/Home';
 import './App.css';
 
 
@@ -27,7 +26,11 @@ const App =()=>{
         setHome(<Home2 />);
     }
     )
-    },[])
+    },[])/*
+    ログイン別ヘッダー
+    
+    */
+
     return (
       <div className='App'>
         {home}
