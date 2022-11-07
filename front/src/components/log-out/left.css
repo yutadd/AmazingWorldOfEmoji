@@ -1,0 +1,11 @@
+.left{
+    display:inline-block;
+    height:93vh;
+    width:40%;
+    margin-left:14vh;
+    background-color: #eee;
+    z-index: 3;
+}
+.name{
+    font-size: 5vh;
+}

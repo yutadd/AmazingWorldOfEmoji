@@ -1,29 +1,36 @@
 import React, { useState,useEffect } from 'react';
-import {Home1} from './logged-in/Home';
-import Home2 from './log-out/Home';
+import Header1 from './log-out/Header1';
+import Header2 from './logged-in/Header2';
+import Left1 from './log-out/Left1';
+import Grid from "@mui/material/Grid"
 import './App.css';
 
 
 
 const App =()=>{
-  const [home,setHome]=useState(<Home2 />);
+  const [home,setHome]=useState(<Header1 />);
+  const [left,setLeft]=useState(<Left1 />);
+  const [right,setRight]=useState(<></>);
   useEffect(()=>{
     fetch("/api/user/get/logged",{mode:'cors'})
     .then(r=>{
       console.log(r.text);
       if(r.ok){
         if(r.text.toString()==="true"){
-          setHome(<Home1 />);
+          setHome(<Header2/>);
         }else{
-          setHome(<Home2 />);
+          setHome(<Header1 />);
+          setLeft(<Left1/>);
         }
       }else{
         alert('認証用のサーバーへ接続できませんでした。');
-        setHome(<Home2 />);
+        setHome(<Header1 />);
+        setLeft(<Left1 />);
       }
     }).catch(e=>{
       alert('認証用のサーバーへ接続できませんでした。');
-        setHome(<Home2 />);
+        setHome(<Header1 />);
+        setLeft(<Left1 />);
     }
     )
     },[])/*
@@ -31,10 +38,13 @@ const App =()=>{
     
     */
 
-    return (
-      <div className='App'>
-        {home}
-      </div>
+    return (<>
+        <header>
+          {home}
+        </header>
+        {left}
+        {right}
+        </>
     );
   }
 

@@ -1,6 +1,7 @@
 package com.yutadd.model.entity;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +17,8 @@ import lombok.Setter;
 	@RequiredArgsConstructor
 	@Getter
 	@Setter
-public class Comment {
+public class Comment implements Comparable<Comment>{
+		
 	@NotBlank
 	private String userID;
 	@Id
@@ -25,4 +27,8 @@ public class Comment {
 	@NotBlank
 	private String text;
 	private Date time;
+	@Override
+	public int compareTo(Comment c) {
+		return c.time.compareTo(time);
+	}
 }

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CommentDetail {
-private Comment comment;
-private long likeAmount;
-private String userName;
+	private Comment comment;
+	private long likeAmount;
+	private String userName;
 }

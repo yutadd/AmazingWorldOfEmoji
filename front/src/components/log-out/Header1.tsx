@@ -11,37 +11,37 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import zIndex from "@mui/material/styles/zIndex";
 import { Autocomplete, List } from "@mui/material";
 
-export default function Home2() {
+
+export default function Header1() {
     const [text,setText]=useState("");
     const [assist,setAssist]=useState([""]);
     return(<>
-        <Toolbar sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Toolbar sx={{height:"6vh", borderBottom: 1, borderColor: 'divider' }}>
         <Autocomplete
         id="first"
         style={{width:'19vh'}}
         value={text}
         options={assist}
         renderInput={(params) => (
-          <TextField {...params} label="clearOnEscape" variant="standard" />
+          <TextField {...params} label="emoji searcher" variant="standard" />
         )}
         onInputChange={(e,value) => {
-            setAssist([""]);
             setText(value);
+           var ar=[""];
             if(value!=""){
-                fetch("/api/share/get/searchemoji?path="+value,{mode:'cors'}).then(result=>{
+                fetch("/api/share/get/searchemoji?path="+value,{mode:'cors'}).then(result=>{ 
                     result.json().then((json)=>{
-                        var ar=[];
                         for(var i=0;i<json.length;i++){
                             ar.push(json[i]["path"])
                         }
+                        setAssist([""]);
                         setAssist(ar);
                     });
                 });
             }
+            
         }}
     />
-        
-       
     <IconButton onClick={()=>{console.log("")}}><SearchIcon>search</SearchIcon></IconButton>
             <Typography
             component="h2"
