@@ -19,7 +19,7 @@ function card(name:string,message:string){
                     <Avatar>{name.charAt(0)}</Avatar>
                 </Grid>
                 <Grid width={"auto"} item xs>
-                    <Typography variant="h6" className='name'>{name}</Typography>
+                    <Typography variant="h6">{name}</Typography>
                     <Typography className='message'>{message}</Typography>
                 </Grid>
             </Grid>
@@ -27,7 +27,7 @@ function card(name:string,message:string){
 }
 
 function Left1(){
-    const [right,setRight]=useState(<><h1>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
+    const [right,setRight]=useState(<><h1 style={{padding:"2vh"}}>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
     const [cards,setCards]=useState([<></>]);
     const update=()=>{
         var _cards=[<></>];

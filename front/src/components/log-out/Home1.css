@@ -1,11 +1,24 @@
-.left{
-    display:inline-block;
-    height:93vh;
-    width:40%;
-    margin-left:14vh;
-    background-color: #eee;
-    z-index: 3;
-    vertical-align: top;
+@media screen and (max-aspect-ratio: 13/9){
+    .left{
+        display:Block;
+        height:93vh;
+        width:90vw;
+        margin-left:5vw;
+        background-color: #eee;
+        z-index: 3;
+        vertical-align: top;
+    }
+    }
+@media screen and (min-aspect-ratio: 13/9) {
+    .left{
+        display:inline-block;
+        height:93vh;
+        width:40vw;
+        margin-left:5vw;
+        background-color: #eee;
+        z-index: 3;
+        vertical-align: top;
+    }
 }
 .name{
     font-size: 5vh;
