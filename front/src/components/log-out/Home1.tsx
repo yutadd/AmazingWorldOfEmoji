@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography"
 import {styled} from "@mui/material/styles"
 import Paper from "@mui/material/Paper"
 import "./Home1.css"
+import Props from "../App"
 function card(name:string,message:string){
     return(
         <Paper
@@ -25,10 +26,8 @@ function card(name:string,message:string){
             </Grid>
         </Paper>);
 }
+function Left1(value:any){
 
-function Left1(setTest: (value: React.SetStateAction<JSX.Element>) => void){
-    setTest(<></>);
-    const [right,setRight]=useState(<><h1 style={{padding:"2vh"}}>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
     const [cards,setCards]=useState([<></>]);
     const update=()=>{
         var _cards=[<></>];
@@ -36,16 +35,19 @@ function Left1(setTest: (value: React.SetStateAction<JSX.Element>) => void){
             for(var a=0;a<json.length;a++){
                 _cards.push(card(json[a]["userID"],json[a]["text"]))
             }
-            //setCards(_cards);
+            setCards(_cards);
+            value.setRight(<><h1>ieeeeei</h1></>)
         }))
     }
     useEffect(()=>{
         update();
     },[])
     return(<><Box className="left">
-        
+        {cards}
     </Box>
-    <Box className="left"></Box>
+    <Box className="left">
+    {value.right}
+    </Box>
     </>);
 }
 export default Left1;

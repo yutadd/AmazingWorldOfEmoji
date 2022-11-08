@@ -9,8 +9,8 @@ import './App.css';
 
 function App(){
   const [home,setHome]=useState(<Header1 />);
-  const [test,setTest]=useState(<></>);
   const [left,setLeft]=useState(<></>);
+  const [right,setRight]=useState(<><h1 style={{padding:"2vh"}}>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
   useEffect(()=>{
     fetch("/api/user/get/logged",{mode:'cors'})
     .then(r=>{
@@ -20,17 +20,18 @@ function App(){
           setHome(<Header2/>);
         }else{
           setHome(<Header1 />);
-          Left1(setTest);
+
+          setLeft(<Left1 setRight={setRight} right={right} />);
         }
       }else{
         alert('認証用のサーバーへ接続できませんでした。');
         setHome(<Header1 />);
-        Left1(setTest);
+        setLeft(<Left1 setRight={setRight} right={right}/>);
       }
     }).catch(e=>{
       alert('認証用のサーバーへ接続できませんでした。');
         setHome(<Header1 />);
-        Left1(setTest);
+        setLeft(<Left1 setRight={setRight}  right={right}/>);
     }
     )
     },[])/*
