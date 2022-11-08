@@ -31,13 +31,15 @@ function Left1(value:any){
     const [cards,setCards]=useState([<></>]);
     const update=()=>{
         var _cards=[<></>];
-        fetch("/api/share/get/comments").then(promise=>promise.json().then((json)=>{
+        fetch("/api/share/get/comments").then(promise=>{promise.json().then((json)=>{
             for(var a=0;a<json.length;a++){
+                
                 _cards.push(card(json[a]["userID"],json[a]["text"]))
             }
             setCards(_cards);
             value.setRight(<><h1>ieeeeei</h1></>)
-        }))
+        })
+    })
     }
     useEffect(()=>{
         update();
