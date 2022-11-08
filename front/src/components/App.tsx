@@ -9,8 +9,8 @@ import './App.css';
 
 function App(){
   const [home,setHome]=useState(<Header1 />);
-  
-  const [left,setLeft]=useState(<Left1/>);
+  const [test,setTest]=useState(<></>);
+  const [left,setLeft]=useState(<></>);
   useEffect(()=>{
     fetch("/api/user/get/logged",{mode:'cors'})
     .then(r=>{
@@ -20,17 +20,17 @@ function App(){
           setHome(<Header2/>);
         }else{
           setHome(<Header1 />);
-          setLeft(<Left1/>);
+          Left1(setTest);
         }
       }else{
         alert('認証用のサーバーへ接続できませんでした。');
         setHome(<Header1 />);
-        setLeft(<Left1 />);
+        Left1(setTest);
       }
     }).catch(e=>{
       alert('認証用のサーバーへ接続できませんでした。');
         setHome(<Header1 />);
-        setLeft(<Left1 />);
+        Left1(setTest);
     }
     )
     },[])/*

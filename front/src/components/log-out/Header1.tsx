@@ -10,6 +10,8 @@ import  MenuItem  from "@mui/material/MenuItem/";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import zIndex from "@mui/material/styles/zIndex";
 import { Autocomplete, List } from "@mui/material";
+import { SettingsBrightness } from "@material-ui/icons";
+import Home1 from "./Home1"
 
 
 export default function Header1() {
@@ -19,7 +21,7 @@ export default function Header1() {
         <Toolbar sx={{height:"6vh", borderBottom: 1, borderColor: 'divider' }}>
         <Autocomplete
         id="first"
-        style={{width:'19vh'}}
+        style={{width:'17vw'}}
         value={text}
         options={assist}
         renderInput={(params) => (
@@ -36,6 +38,9 @@ export default function Header1() {
                         }
                         setAssist([""]);
                         setAssist(ar);
+                        if(json.length==1){
+                          
+                        }
                     });
                 });
             }

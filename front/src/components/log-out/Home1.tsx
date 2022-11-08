@@ -26,7 +26,8 @@ function card(name:string,message:string){
         </Paper>);
 }
 
-function Left1(){
+function Left1(setTest: (value: React.SetStateAction<JSX.Element>) => void){
+    setTest(<></>);
     const [right,setRight]=useState(<><h1 style={{padding:"2vh"}}>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
     const [cards,setCards]=useState([<></>]);
     const update=()=>{
@@ -35,16 +36,16 @@ function Left1(){
             for(var a=0;a<json.length;a++){
                 _cards.push(card(json[a]["userID"],json[a]["text"]))
             }
-            setCards(_cards);
+            //setCards(_cards);
         }))
     }
     useEffect(()=>{
         update();
     },[])
     return(<><Box className="left">
-        {cards}
+        
     </Box>
-    <Box className="left">{right}</Box>
+    <Box className="left"></Box>
     </>);
 }
 export default Left1;
