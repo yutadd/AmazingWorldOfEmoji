@@ -5,7 +5,7 @@ import Avatar from "@mui/material/Avatar"
 import Typography from "@mui/material/Typography"
 import {styled} from "@mui/material/styles"
 import Paper from "@mui/material/Paper"
-import "./left.css"
+import "./Home1.css"
 function card(name:string,message:string){
     return(
         <Paper
@@ -25,8 +25,10 @@ function card(name:string,message:string){
             </Grid>
         </Paper>);
 }
-function Left1() {
-    const [cards,setCards]=useState([<></>])
+
+function Left1(){
+    const [right,setRight]=useState(<><h1>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
+    const [cards,setCards]=useState([<></>]);
     const update=()=>{
         var _cards=[<></>];
         fetch("/api/share/get/comments").then(promise=>promise.json().then((json)=>{
@@ -40,8 +42,9 @@ function Left1() {
         update();
     },[])
     return(<><Box className="left">
-{cards}
+        {cards}
     </Box>
+    <Box className="left">{right}</Box>
     </>);
 }
 export default Left1;

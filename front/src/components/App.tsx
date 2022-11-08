@@ -1,16 +1,16 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect } from "react";
 import Header1 from './log-out/Header1';
 import Header2 from './logged-in/Header2';
-import Left1 from './log-out/Left1';
+import Left1 from './log-out/Home1';
 import Grid from "@mui/material/Grid"
 import './App.css';
 
 
 
-const App =()=>{
+function App(){
   const [home,setHome]=useState(<Header1 />);
-  const [left,setLeft]=useState(<Left1 />);
-  const [right,setRight]=useState(<></>);
+  
+  const [left,setLeft]=useState(<Left1/>);
   useEffect(()=>{
     fetch("/api/user/get/logged",{mode:'cors'})
     .then(r=>{
@@ -43,7 +43,6 @@ const App =()=>{
           {home}
         </header>
         {left}
-        {right}
         </>
     );
   }

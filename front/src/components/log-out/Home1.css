@@ -5,6 +5,7 @@
     margin-left:14vh;
     background-color: #eee;
     z-index: 3;
+    vertical-align: top;
 }
 .name{
     font-size: 5vh;
