@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography"
 import Paper from "@mui/material/Paper"
 import "./Home1.css"
 import {RightContext} from "../App"
+import { CardTravelSharp } from '@material-ui/icons';
 
 function card(name:string,message:string,uid:string,cid:string){
     console.log(name)
@@ -15,7 +16,7 @@ function card(name:string,message:string,uid:string,cid:string){
     return(
         <Paper
             sx={{
-            mt: "0vh",//margin-y 8px
+            mt: "0.8vh",//margin-y 8px
             mx: 1,//margin-x
             p: 2,//padding 16px
             }}>
@@ -26,7 +27,7 @@ function card(name:string,message:string,uid:string,cid:string){
                 <Grid width={"auto"} sx={{my:"0",mx:"1vw"}} xs>
                     <p className='name'>{name}</p>
                     <p className='user-id'>{uid}</p>
-                    <Typography className='message' sx={{mt:"2vh"}}>{message}</Typography>
+                    <Typography className='message'style={{wordBreak:"break-word"}} sx={{mt:"2vh"}}>{message}</Typography>
                 </Grid>
             </Grid>
         </Paper>);
@@ -46,7 +47,7 @@ function Home1(){
                 fetch("/api/share/get/getuser?uid="+uid,{mode:'cors'}).then(prename=>{
                     prename.json().then(user=>{
                         let entity=card(user["name"],text,uid,cid);
-                        _cards[a]=entity;
+                        _cards=[..._cards,entity];
                         setLeft(_cards);//then以降はおそらく非同期実行だから、ここでないとからの配列でcardsが上書きされてしまう。
                     })
                 })
@@ -55,7 +56,6 @@ function Home1(){
         })
          
     })
-    setRight(<><h1>daizyobu!</h1></>)
     }
     useEffect(()=>{
    update();

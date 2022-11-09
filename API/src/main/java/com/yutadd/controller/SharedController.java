@@ -34,6 +34,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.google.gson.Gson;
 import com.yutadd.model.CommentDetail;
+import com.yutadd.model.EmojiDetail;
 import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.Emoji;
@@ -128,8 +129,21 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value="/get/searchemoji",method=RequestMethod.GET)
 	@ResponseBody
 	public String searchEmoji(@RequestParam("path")String path) {
-		List<Emoji> emojis=erepository.findEmoji(path+"%");
+		List<String> emojis=erepository.findEmoji(path+"%");
 		return new Gson().toJson(emojis);
+	}
+	@RequestMapping(value="/get/getEmojiDetail",method=RequestMethod.GET)
+	@ResponseBody
+	public String getEmojiDetail(@RequestParam("path")String path) {
+		Emoji e=erepository.getEmoji(path);
+		User u=urepository.getUser(e.getUserID());
+		EmojiDetail ud=new EmojiDetail();
+		ud.setUserName(u.getName());
+		ud.setUserID(u.getUserid());
+		ud.setPath(path);
+		ud.setTitle(e.getTitle());
+		ud.setType(e.getType());
+		return new Gson().toJson(ud);
 	}
 	@RequestMapping(value="/get/getuser",method=RequestMethod.GET)
 	@ResponseBody
