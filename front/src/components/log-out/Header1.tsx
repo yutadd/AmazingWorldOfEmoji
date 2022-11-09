@@ -37,9 +37,6 @@ export default function Header1() {
                         }
                         setAssist([""]);
                         setAssist(ar);
-                        if(json.length===1){
-                          
-                        }
                     });
                 });
             }

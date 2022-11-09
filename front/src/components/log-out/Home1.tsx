@@ -15,18 +15,18 @@ function card(name:string,message:string,uid:string,cid:string){
     return(
         <Paper
             sx={{
-            my: 1,//margin-y 8px
+            mt: "0vh",//margin-y 8px
             mx: 1,//margin-x
             p: 2,//padding 16px
             }}>
             <Grid container wrap="nowrap" spacing={2}>
-                <Grid>
+                <Grid sx={{ml:"1vw",mt:"1vh"}}>
                     <Avatar>{name.charAt(0)}</Avatar>
                 </Grid>
-                <Grid width={"auto"} item xs>
-                <p className='name'>{name}</p>
-                <p className='user-id'>{uid}</p>
-                    <Typography className='message'>{message}</Typography>
+                <Grid width={"auto"} sx={{my:"0",mx:"1vw"}} xs>
+                    <p className='name'>{name}</p>
+                    <p className='user-id'>{uid}</p>
+                    <Typography className='message' sx={{mt:"2vh"}}>{message}</Typography>
                 </Grid>
             </Grid>
         </Paper>);
@@ -63,7 +63,7 @@ function Home1(){
     },[])
     return(
     <>
-        <Box className="left">
+        <Box sx={{pt:"1vh"}} className="left">
             {left}
         </Box>
         <Box className="left">
