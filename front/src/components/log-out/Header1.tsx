@@ -1,17 +1,19 @@
-import {useState} from "react";
+import {useState,useContext} from "react";
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
+import {RightContext} from "../App"
 
-import { Autocomplete} from "@mui/material";
+import { Autocomplete, useControlled} from "@mui/material";
 
 
 
 
 export default function Header1() {
+    const [right,setRight]=useContext(RightContext);
     const [text,setText]=useState("");
     const [assist,setAssist]=useState([""]);
     return(<>

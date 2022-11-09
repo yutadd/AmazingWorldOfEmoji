@@ -1,25 +1,31 @@
-import  { useState,useEffect } from "react";
+import  { useState,useEffect, createContext } from "react";
 import Header1 from './log-out/Header1';
 import Header2 from './logged-in/Header2';
-import Left1 from './log-out/Home1';
+import Home1 from './log-out/Home1';
 import './App.css';
-
-
-
+export type Right=[
+  right:any,
+  setRight:any
+];
+const shoki:Right=[null,null];
+export const RightContext= createContext(shoki);
 function App(){
-  const [home,setHome]=useState(<Header1 />);
-  const [left,setLeft]=useState(<></>);
   const [right,setRight]=useState(<><h1 style={{padding:"2vh"}}>検索結果やクリックしたコメントやユーザーの詳細情報が表示されます。</h1></>);
+  const init:Right=[
+    right,setRight
+  ]
+  const [header,setHeader]=useState(<Header1 />);
+  const [home,setHome]=useState(<></>);
   useEffect(()=>{
     fetch("/api/user/get/logged",{mode:'cors'})
     .then(r=>{
       r.text().then(bool=>{
         console.log(bool);
         if(bool==="true"){
-          setHome(<Header2/>);
+          setHeader(<Header2/>);
         }else{
-          setHome(<Header1 />);
-          setLeft(<Left1 setRight={setRight} right={right} />);
+          setHeader(<Header1 />);
+          setHome(<Home1/>);
         }
       })
       
@@ -30,10 +36,14 @@ function App(){
     */
 
     return (<>
-        <header>
-          {home}
+    <RightContext.Provider value={init}>
+      <header>
+          {header}
         </header>
-        {left}
+        {home}
+        
+    </RightContext.Provider>
+        
         </>
     );
   }

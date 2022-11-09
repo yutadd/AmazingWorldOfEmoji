@@ -1,10 +1,11 @@
-import {useState,useEffect } from 'react';
+import {useState,useEffect, useContext } from 'react';
 import Box from "@mui/material/Box"
 import Grid from "@mui/material/Grid"
 import Avatar from "@mui/material/Avatar"
 import Typography from "@mui/material/Typography"
 import Paper from "@mui/material/Paper"
 import "./Home1.css"
+import {RightContext} from "../App"
 
 function card(name:string,message:string,uid:string,cid:string){
     console.log(name)
@@ -31,8 +32,9 @@ function card(name:string,message:string,uid:string,cid:string){
         </Paper>);
 }
 
-function Left1(value:any){
-    const [cards,setCards]=useState([<div id="cards"></div>]);
+function Home1(){
+    const [right,setRight]=useContext(RightContext);
+    const [left,setLeft]=useState([<div id="cards"></div>]);
     function update(){
         let _cards=[<></>];
         fetch("/api/share/get/comments").then(promise=>{
@@ -45,7 +47,7 @@ function Left1(value:any){
                     prename.json().then(user=>{
                         let entity=card(user["name"],text,uid,cid);
                         _cards[a]=entity;
-                        setCards(_cards);//then以降はおそらく非同期実行だから、ここでないとからの配列でcardsが上書きされてしまう。
+                        setLeft(_cards);//then以降はおそらく非同期実行だから、ここでないとからの配列でcardsが上書きされてしまう。
                     })
                 })
             }
@@ -53,18 +55,21 @@ function Left1(value:any){
         })
          
     })
+    setRight(<><h1>daizyobu!</h1></>)
     }
     useEffect(()=>{
    update();
         
     },[])
-    return(<>
-    <Box className="left">
-    {cards}
-</Box>
-<Box className="left">
-{value.right}
-</Box>
-</>);
+    return(
+    <>
+        <Box className="left">
+            {left}
+        </Box>
+        <Box className="left">
+            {right}
+        </Box>
+    </>
+);
 }
-export default Left1;
+export default Home1;
