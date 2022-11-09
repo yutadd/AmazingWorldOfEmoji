@@ -7,9 +7,11 @@ import Paper from "@mui/material/Paper"
 import "./Home1.css"
 
 function card(name:string,message:string,uid:string,cid:string){
+    console.log(name)
+    console.log(message)
+    console.log(uid)
     console.log(cid)
     return(
-
         <Paper
             sx={{
             my: 1,//margin-y 8px
@@ -22,7 +24,7 @@ function card(name:string,message:string,uid:string,cid:string){
                 </Grid>
                 <Grid width={"auto"} item xs>
                 <p className='name'>{name}</p>
-                    <p className='user-id'>{uid}</p>
+                <p className='user-id'>{uid}</p>
                     <Typography className='message'>{message}</Typography>
                 </Grid>
             </Grid>
@@ -30,38 +32,34 @@ function card(name:string,message:string,uid:string,cid:string){
 }
 
 function Left1(value:any){
-
-    const [cards,setCards]=useState([<></>]);
-    var _cards=[<></>];
+    const [cards,setCards]=useState([<div id="cards"></div>]);
     function update(){
-        
+        let _cards=[<></>];
         fetch("/api/share/get/comments").then(promise=>{
-            
             promise.json().then((json)=>{
             for(let a=0;a<json.length;a++){
-                console.log(a);
                 let text=json[a]["text"];
                 let cid=json[a]["commentID"];
                 let uid=json[a]["userID"];
                 fetch("/api/share/get/getuser?uid="+uid,{mode:'cors'}).then(prename=>{
                     prename.json().then(user=>{
-                        console.log(user["name"]);
-                        _cards.push(card(user["name"],text,uid,cid))
-                })})
+                        let entity=card(user["name"],text,uid,cid);
+                        _cards[a]=entity;
+                        setCards(_cards);//then以降はもしかしたら非同期で実行されるから、setcardsはthenの内側にあるのが正しいのかも
+                    })
+                })
             }
-            console.log(_cards)
-            setCards(_cards);
+
         })
          
     })
-    
-        
     }
     useEffect(()=>{
    update();
         
     },[])
-    return(<><Box className="left">
+    return(<>
+    <Box className="left">
     {cards}
 </Box>
 <Box className="left">
