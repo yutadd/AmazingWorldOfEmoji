@@ -45,7 +45,7 @@ function Left1(value:any){
                     prename.json().then(user=>{
                         let entity=card(user["name"],text,uid,cid);
                         _cards[a]=entity;
-                        setCards(_cards);//then以降はもしかしたら非同期で実行されるから、setcardsはthenの内側にあるのが正しいのかも
+                        setCards(_cards);//then以降はおそらく非同期実行だから、ここでないとからの配列でcardsが上書きされてしまう。
                     })
                 })
             }
