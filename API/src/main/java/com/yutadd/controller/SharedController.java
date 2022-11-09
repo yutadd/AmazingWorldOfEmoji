@@ -34,9 +34,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.google.gson.Gson;
 import com.yutadd.model.CommentDetail;
+import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.Emoji;
 import com.yutadd.model.entity.Like;
+import com.yutadd.model.entity.User;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
 import com.yutadd.repository.LikeRepository;
@@ -120,7 +122,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value="/get/searchuser",method=RequestMethod.GET)
 	@ResponseBody
 	public String searchUser(@RequestParam("name")String name) {
-		List<String> users=urepository.findUsers(name+"%");
+		List<User> users=urepository.findUsers(name+"%");
 		return new Gson().toJson(users);
 	}
 	@RequestMapping(value="/get/searchemoji",method=RequestMethod.GET)
@@ -128,6 +130,15 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public String searchEmoji(@RequestParam("path")String path) {
 		List<Emoji> emojis=erepository.findEmoji(path+"%");
 		return new Gson().toJson(emojis);
+	}
+	@RequestMapping(value="/get/getuser",method=RequestMethod.GET)
+	@ResponseBody
+	public String getUser(@RequestParam("uid")String uid) {
+		User user=urepository.getUser(uid);
+		UserDetail ud=new UserDetail();
+		ud.setName(user.getName());
+		ud.setUid(uid);
+		return new Gson().toJson(ud);
 	}
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {

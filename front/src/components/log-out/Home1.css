@@ -20,6 +20,9 @@
         vertical-align: top;
     }
 }
+.user-id{
+    font-size: 1vh;
+}
 .name{
-    font-size: 5vh;
+    font-size:2.1vh;
 }

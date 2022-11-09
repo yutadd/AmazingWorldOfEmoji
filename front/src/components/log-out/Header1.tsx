@@ -1,4 +1,4 @@
-import React,{ReactNode,useState} from "react";
+import {useState} from "react";
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -6,12 +6,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 
-import  MenuItem  from "@mui/material/MenuItem/";
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import zIndex from "@mui/material/styles/zIndex";
-import { Autocomplete, List } from "@mui/material";
-import { SettingsBrightness } from "@material-ui/icons";
-import Home1 from "./Home1"
+import { Autocomplete} from "@mui/material";
+
+
 
 
 export default function Header1() {
@@ -30,7 +27,7 @@ export default function Header1() {
         onInputChange={(e,value) => {
             setText(value);
            var ar=[""];
-            if(value!=""){
+            if(value!==""){
                 fetch("/api/share/get/searchemoji?path="+value,{mode:'cors'}).then(result=>{ 
                     result.json().then((json)=>{
                         for(var i=0;i<json.length;i++){
@@ -38,7 +35,7 @@ export default function Header1() {
                         }
                         setAssist([""]);
                         setAssist(ar);
-                        if(json.length==1){
+                        if(json.length===1){
                           
                         }
                     });

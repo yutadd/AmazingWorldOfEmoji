@@ -1,14 +1,15 @@
-import React,{useState,useEffect } from 'react';
+import {useState,useEffect } from 'react';
 import Box from "@mui/material/Box"
 import Grid from "@mui/material/Grid"
 import Avatar from "@mui/material/Avatar"
 import Typography from "@mui/material/Typography"
-import {styled} from "@mui/material/styles"
 import Paper from "@mui/material/Paper"
 import "./Home1.css"
-import Props from "../App"
-function card(name:string,message:string){
+
+function card(name:string,message:string,uid:string,cid:string){
+    console.log(cid)
     return(
+
         <Paper
             sx={{
             my: 1,//margin-y 8px
@@ -20,36 +21,52 @@ function card(name:string,message:string){
                     <Avatar>{name.charAt(0)}</Avatar>
                 </Grid>
                 <Grid width={"auto"} item xs>
-                    <Typography variant="h6">{name}</Typography>
+                <p className='name'>{name}</p>
+                    <p className='user-id'>{uid}</p>
                     <Typography className='message'>{message}</Typography>
                 </Grid>
             </Grid>
         </Paper>);
 }
+
 function Left1(value:any){
 
     const [cards,setCards]=useState([<></>]);
-    const update=()=>{
-        var _cards=[<></>];
-        fetch("/api/share/get/comments").then(promise=>{promise.json().then((json)=>{
-            for(var a=0;a<json.length;a++){
-                
-                _cards.push(card(json[a]["userID"],json[a]["text"]))
+    var _cards=[<></>];
+    function update(){
+        
+        fetch("/api/share/get/comments").then(promise=>{
+            
+            promise.json().then((json)=>{
+            for(let a=0;a<json.length;a++){
+                console.log(a);
+                let text=json[a]["text"];
+                let cid=json[a]["commentID"];
+                let uid=json[a]["userID"];
+                fetch("/api/share/get/getuser?uid="+uid,{mode:'cors'}).then(prename=>{
+                    prename.json().then(user=>{
+                        console.log(user["name"]);
+                        _cards.push(card(user["name"],text,uid,cid))
+                })})
             }
+            console.log(_cards)
             setCards(_cards);
-            value.setRight(<><h1>ieeeeei</h1></>)
         })
+         
     })
+    
+        
     }
     useEffect(()=>{
-        update();
+   update();
+        
     },[])
     return(<><Box className="left">
-        {cards}
-    </Box>
-    <Box className="left">
-    {value.right}
-    </Box>
-    </>);
+    {cards}
+</Box>
+<Box className="left">
+{value.right}
+</Box>
+</>);
 }
 export default Left1;

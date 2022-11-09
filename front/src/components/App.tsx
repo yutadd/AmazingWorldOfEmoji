@@ -1,8 +1,7 @@
-import React, { useState,useEffect } from "react";
+import  { useState,useEffect } from "react";
 import Header1 from './log-out/Header1';
 import Header2 from './logged-in/Header2';
 import Left1 from './log-out/Home1';
-import Grid from "@mui/material/Grid"
 import './App.css';
 
 
@@ -14,26 +13,17 @@ function App(){
   useEffect(()=>{
     fetch("/api/user/get/logged",{mode:'cors'})
     .then(r=>{
-      console.log(r.text);
-      if(r.ok){
-        if(r.text.toString()==="true"){
+      r.text().then(bool=>{
+        console.log(bool);
+        if(bool==="true"){
           setHome(<Header2/>);
         }else{
           setHome(<Header1 />);
-
           setLeft(<Left1 setRight={setRight} right={right} />);
         }
-      }else{
-        alert('認証用のサーバーへ接続できませんでした。');
-        setHome(<Header1 />);
-        setLeft(<Left1 setRight={setRight} right={right}/>);
-      }
-    }).catch(e=>{
-      alert('認証用のサーバーへ接続できませんでした。');
-        setHome(<Header1 />);
-        setLeft(<Left1 setRight={setRight}  right={right}/>);
-    }
-    )
+      })
+      
+    })
     },[])/*
     ログイン別ヘッダー
     

@@ -42,7 +42,7 @@ public String isLogged(HttpSession session) {
 		User u=new User();
 		if(password.length()>=8) {
 			if(uID.matches("@[a-z]*[A-Z]*")) {
-				u.setUserID(uID);
+				u.setUserid(uID);
 				u.setName(name);
 				u.setPassword(new BCryptPasswordEncoder().encode(password));
 				u.setEmail(email);

@@ -22,7 +22,7 @@ public class User {
 	private String name;
 	@Id
 	@Column(unique=true)
-	private String UserID;
+	private String userid;
 	@NotBlank
 	private String password;
 	private Date birth;
