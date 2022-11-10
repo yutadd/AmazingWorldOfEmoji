@@ -33,7 +33,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.google.gson.Gson;
-import com.yutadd.model.CommentDetail;
 import com.yutadd.model.EmojiDetail;
 import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
@@ -78,22 +77,19 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	}
 	@RequestMapping(value="/post/like",method=RequestMethod.POST)
 	@ResponseBody
-	public void getNewPosts(HttpSession session,@RequestParam("cid")String cid) {
+	public ResponseEntity<String>  getNewPosts(HttpSession session,@RequestParam("cid")String cid) {
 		Like l=new Like();
 		l.setCommentID(cid);
+		try {
 		l.setUserID(srepository.findById(session.getId()).get().getUserID());
-		lrepository.save(l);
-	}
-	@RequestMapping(value="/get/commentdetail",method=RequestMethod.GET)
-	@ResponseBody
-	public String getCommentDetail(HttpSession session,@RequestParam("cid")String cid) {
-		CommentDetail cd=new CommentDetail();
+		}catch(Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください。");
+		}
 		Comment c=crepository.findById(cid).get();
-		String uid=c.getUserID();
-		cd.setComment(c);
-		cd.setLikeAmount(lrepository.countById(cid));
-		cd.setUserName(urepository.findById(uid).get().getName());
-		return new Gson().toJson(cd);
+		c.setLikes((c.getLikes()+1));
+		crepository.save(c);
+		lrepository.save(l);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
 	@ResponseBody

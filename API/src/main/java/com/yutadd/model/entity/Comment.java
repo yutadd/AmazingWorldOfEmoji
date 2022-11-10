@@ -1,5 +1,6 @@
 package com.yutadd.model.entity;
 
+import java.math.BigInteger;
 import java.sql.Date;
 import java.time.LocalDate;
 
@@ -27,6 +28,7 @@ public class Comment implements Comparable<Comment>{
 	@NotBlank
 	private String text;
 	private Date time;
+	private long likes;
 	@Override
 	public int compareTo(Comment c) {
 		return c.time.compareTo(time);

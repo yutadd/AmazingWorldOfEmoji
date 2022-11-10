@@ -12,11 +12,6 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
-import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {RightContext} from "../App";
 
 import { Autocomplete} from "@mui/material";
@@ -45,7 +40,7 @@ spl.map(e=>{
             <Card sx={{ mt:"1vh"}}>
             <CardHeader
               avatar={
-                <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                <Avatar aria-label="recipe">
                   {detail["userName"].charAt(0)}
                 </Avatar>
               }
