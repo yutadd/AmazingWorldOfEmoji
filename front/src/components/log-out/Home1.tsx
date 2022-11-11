@@ -50,7 +50,7 @@ function Home1(){
                   alt="Paella dish"
                 />
                 <CardContent>
-                <Grid width={"90%"} sx={{my:"0",mx:"1vw"}} xs>
+                <Grid width={"90%"} sx={{my:"0",mx:"1vw"}} >
                 <Typography style={{wordBreak:"break-word"}}className='message' sx={{mt:"2vh"}}>
                     {json2yaml(json)}
                 </Typography>
@@ -80,7 +80,7 @@ function Home1(){
                         <Avatar>{name.charAt(0)}</Avatar>
                         <IconButton onClick={()=>postLike(json["commentID"])} sx={{mt:"1vh",ml:"0.2vw"}}><FavoriteBorderIcon></FavoriteBorderIcon></IconButton>
                     </Grid>
-                    <Grid width={"auto"} sx={{my:"0",mx:"1vw"}} xs>
+                    <Grid width={"auto"} sx={{my:"0",mx:"1vw"}}>
                         <p className='name'>{name}</p>
                         <p className='user-id'>{json["userID"]}</p>
                         <Typography onClick={()=>showDetailRight(name,json)} className='message'style={{wordBreak:"break-word"}} sx={{mt:"1vh"}}>{json["text"]}</Typography>
@@ -93,6 +93,7 @@ function Home1(){
         let _cards=[<></>];
         fetch("/api/share/get/comments").then(promise=>{
             promise.json().then((json)=>{
+                console.log(json);
             for(let a=0;a<json.length;a++){
                 let uid=json[a]["userID"];
                 fetch("/api/share/get/getuser?uid="+uid,{mode:'cors'}).then(prename=>{

@@ -54,7 +54,7 @@ spl.map(e=>{
               alt="Paella dish"
             />
             <CardContent>
-            <Grid width={"90%"} sx={{my:"0",mx:"1vw"}} xs>
+            <Grid width={"90%"} sx={{my:"0",mx:"1vw"}}>
             <Typography style={{wordBreak:"break-word"}}className='message' sx={{mt:"2vh"}}>
                 {json2yaml(detail)}
                 </Typography>
@@ -89,9 +89,11 @@ spl.map(e=>{
             setText(value);
            var ar=[""];
             if(value!==""){
-                fetch("/api/share/get/searchemoji?path="+value,{mode:'cors'}).then(result=>{ 
+                fetch("/api/share/get/searchemoji?path="+value,{mode:'cors'}).then(result=>{
                     result.json().then((json)=>{
                         for(var i=0;i<json.length;i++){
+                          console.log("path↓")
+                          console.log(json[i])
                             ar.push(json[i]);
                         }
                         setAssist([""]);
