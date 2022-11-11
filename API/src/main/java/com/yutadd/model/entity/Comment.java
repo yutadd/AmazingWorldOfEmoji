@@ -1,8 +1,6 @@
 package com.yutadd.model.entity;
 
-import java.math.BigInteger;
 import java.sql.Date;
-import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,12 +17,16 @@ import lombok.Setter;
 	@Getter
 	@Setter
 public class Comment implements Comparable<Comment>{
-		
 	@NotBlank
 	private String userID;
 	@Id
 	@Column(unique=true)
 	private String commentID;
+	private String file1;
+	private String file2;
+	private String file3;
+	private String file4;
+	
 	@NotBlank
 	private String text;
 	private Date time;
