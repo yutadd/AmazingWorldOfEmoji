@@ -9,14 +9,14 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
-import "./Home1.css"
+import "./Home2.css"
 import {Context} from "../App"
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import Box from '@mui/material/Box';
 
 
 
-function Home1(){
+function Home2(){
     const [right,setRight]=useContext(Context);
     const [left,setLeft]=useState([<div id="cards"></div>]);
     function json2yaml(detail:JSON):JSX.Element[]{
@@ -64,7 +64,8 @@ function Home1(){
            
     }
     function postLike(cid:string){
-        alert("ログインして実行してください")
+        console.log(cid)
+        fetch("/api/share/post/like?cid="+cid,{method:'POST'}).then(e=>e.text().then(t=>alert(t)));
     }
     function card(name:string,json:any){
         console.log(name)
@@ -132,4 +133,4 @@ function Home1(){
     </>
 );
 }
-export default Home1;
+export default Home2;

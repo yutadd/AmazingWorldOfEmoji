@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -58,7 +59,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value="/post/message", method=RequestMethod.POST)
 	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files")String files,HttpSession session) {
 		try {
-			String[] fileargs=files.split(Pattern.quote("."));
+			String[] fileargs=files.split(Pattern.quote(";"));
 			String uid=srepository.findById(session.getId()).get().getUserID();
 			Random rn = new Random();
 			BigInteger cID= new BigInteger(255,rn);
@@ -74,6 +75,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			crepository.save(c);
 			return new ResponseEntity<>(HttpStatus.OK);
 		}catch(Exception e) {
+			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください");
 		}
 	}
@@ -87,7 +89,13 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		}catch(Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください。");
 		}
-		Comment c=crepository.findById(cid).get();
+		Comment c=null;
+		try {
+			c=crepository.findById(cid).get();
+		}catch(Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("一致するコメントが見つかりません。");
+		}
 		c.setLikes((c.getLikes()+1));
 		crepository.save(c);
 		lrepository.save(l);
@@ -107,7 +115,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public byte[] emojiImage(@RequestParam("emoji")String emojiPath,@RequestParam("type")String type) {
 		try {
 			String[] str1=emojiPath.split(Pattern.quote("."));
-			FileInputStream fis=new FileInputStream(new File(str1[0]+File.separator+str1[1]+"."+type));
+			FileInputStream fis=new FileInputStream(new File("user"+File.separator+str1[0]+File.separator+str1[1]+"."+type));
 			return IOUtils.toByteArray(fis);
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -152,6 +160,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		ud.setUid(uid);
 		return new Gson().toJson(ud);
 	}
+
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {
 		if(srepository.existsById(session.getId())) {
@@ -160,7 +169,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 					String uid=srepository.findById(session.getId()).get().getUserID();
 					String replacesuid=uid.replace("@","");
 					Path path=Paths.get(replacesuid);
-					File file=new File(replacesuid+File.separator+title+"."+type);
+					File file=new File("user"+File.separator+replacesuid+File.separator+title+"."+type);
 					Files.createDirectories(path);
 					//f.createNewFile();
 					OutputStream output=new FileOutputStream(file);

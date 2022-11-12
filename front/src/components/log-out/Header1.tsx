@@ -12,15 +12,16 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Grid from '@mui/material/Grid';
 import Avatar from '@mui/material/Avatar';
-import {RightContext} from "../App";
+import {Context} from "../App";
+import Modal from "@mui/material/Modal";
 
 import { Autocomplete} from "@mui/material";
 
 export default function Header1() {
-    const [right,setRight]=useContext(RightContext);
+    const [right,setRight,showL,setShowL]=useContext(Context);
     const [text,setText]=useState("");
     const [assist,setAssist]=useState([""]);
-
+    
     function json2yaml(detail:JSON):JSX.Element[]{
       const YAML=require('yaml');
       const doc=new YAML.Document();
@@ -115,7 +116,7 @@ spl.map(e=>{
             >
           TheAmazingWorldOfEmoji
         </Typography><img src="icon.png" height={30}/>
-        <Button size="large">log-in</Button>
+        <Button onClick={()=>{if(!showL){setShowL(true)}else{setShowL(false)}}} size="large">log-in</Button>
         <Button variant="outlined" size="large">
           Sign up
         </Button>
