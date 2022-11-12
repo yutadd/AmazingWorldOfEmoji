@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import CommentCard from "./CommentCard";
-import "./Home2.css";
-import { Context } from "../App";
+import "./Home.css";
+import { Context } from "./App";
 
 import Box from "@mui/material/Box";
-function Home2() {
+function Home() {
   const [right, setRight] = useContext(Context);
   const [left, setLeft] = useState([<div id="cards"></div>]);
   useEffect(() => {
@@ -36,4 +36,4 @@ function Home2() {
     </>
   );
 }
-export default Home2;
+export default Home;

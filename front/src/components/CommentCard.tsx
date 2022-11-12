@@ -5,7 +5,7 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import ShowDetailRight from "./ShowDetailRight";
-import { Context } from "../App";
+import { Context } from "./App";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 export default function CommentCard(property: any) {
   let name = property.user;
@@ -19,6 +19,8 @@ export default function CommentCard(property: any) {
       e.text().then((t) => {
         if (t == "liked") {
           setlikes(likes + 1);
+        } else {
+          alert("ログインして実行してください。");
         }
       })
     );
@@ -26,13 +28,19 @@ export default function CommentCard(property: any) {
   function update() {
     fetch("/api/share/get/comment?cid=" + json["commentID"]).then((e) => {
       e.json().then((newJson) => {
-        json = newJson;
-        setlikes(parseInt(json["likes"]));
+        if (newJson.length == 0) {
+          setShowMe(false);
+        } else {
+          json = newJson;
+          setlikes(parseInt(json["likes"]));
+        }
       });
     });
   }
   useEffect(() => {
-    update();
+    setInterval(() => {
+      update();
+    }, 5000);
   }, []);
   return (
     <Paper

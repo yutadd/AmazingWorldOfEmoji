@@ -7,18 +7,16 @@ import CardActions from "@mui/material/CardActions";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
-import { Context } from "../App";
 export default function ShowDetailRight(values: any) {
   let name = values.name;
   let json = values.json;
-
+  const [detailYml, setDetailYml] = useState(json2yaml(json));
   function json2yaml(detail: JSON): JSX.Element[] {
     const YAML = require("yaml");
     const doc = new YAML.Document();
     doc.contents = detail;
     let ret: JSX.Element[] = [];
     let spl: string[] = doc.toString().split("\n");
-
     spl.map((e) => {
       ret.push(
         <React.Fragment key={e}>
@@ -29,6 +27,19 @@ export default function ShowDetailRight(values: any) {
     });
     return ret;
   }
+  function update() {
+    fetch("/api/share/get/comment?cid=" + json["commentID"]).then((e) => {
+      e.json().then((newJson) => {
+        json = newJson;
+        setDetailYml(json2yaml(json));
+      });
+    });
+  }
+  useEffect(() => {
+    setInterval(() => {
+      update();
+    }, 5000);
+  }, []);
   return (
     <Card sx={{ mt: "1vh" }}>
       <CardHeader
@@ -44,7 +55,7 @@ export default function ShowDetailRight(values: any) {
             className="message"
             sx={{ mt: "2vh" }}
           >
-            {json2yaml(json)}
+            {detailYml}
           </Typography>
         </Grid>
       </CardContent>

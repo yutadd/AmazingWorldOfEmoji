@@ -58,22 +58,22 @@ public class UserController {
 	}
 	@RequestMapping(value="/post/registration", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String> registration(HttpSession session,@RequestParam("name") String name,@RequestParam("UserID") String uID,@RequestParam("password") String password,@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)@RequestParam("birth") LocalDate birth,@RequestParam("email") String email) {
+	public ResponseEntity<String> registration(HttpSession session,@RequestParam("name") String name,@RequestParam("id") String id,@RequestParam("pass") String pass,@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)@RequestParam("birth") LocalDate birth,@RequestParam("email") String email) {
 		String sessionID=session.getId();
 		User u=new User();
-		if(password.length()>=8) {
-			if(uID.matches("@[a-z]*[A-Z]*")) {
-				u.setUserid(uID);
+		if(pass.length()>=8) {
+			if(id.length()>4&&id.matches("[a-z]*[A-Z]*")) {
+				u.setUserid(id);
 				u.setName(name);
-				u.setPassword(new BCryptPasswordEncoder().encode(password));
+				u.setPassword(new BCryptPasswordEncoder().encode(pass));
 				u.setEmail(email);
 				u.setBirth(Date.valueOf(birth));
 				urepository.save(u);
 				SessionID se=new SessionID();
-				se.setUserID(uID);
+				se.setUserID(id);
 				se.setSessionID(sessionID);
 				srepository.save(se);
-				return new ResponseEntity<>(HttpStatus.OK);
+				return ResponseEntity.status(HttpStatus.OK).body("accepted");
 			}else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid ID");
 			}
