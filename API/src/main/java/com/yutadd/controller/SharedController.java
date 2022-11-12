@@ -99,7 +99,19 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		c.setLikes((c.getLikes()+1));
 		crepository.save(c);
 		lrepository.save(l);
-		return new ResponseEntity<>(HttpStatus.OK);
+		return ResponseEntity.status(HttpStatus.OK).body("liked");
+	}
+	@RequestMapping(value="/get/comment")
+	@ResponseBody
+	public ResponseEntity<String> getComment(@RequestParam("cid")String cid) {
+		Comment c;
+		try {
+		c=crepository.findById(cid).get();
+		}catch(Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[]");
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(c));
+		
 	}
 	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
 	@ResponseBody
