@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
@@ -32,10 +33,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.google.gson.Gson;
 import com.yutadd.model.EmojiDetail;
+import com.yutadd.model.HistoryRepository;
 import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.Emoji;
+import com.yutadd.model.entity.History;
 import com.yutadd.model.entity.Like;
+import com.yutadd.model.entity.SessionID;
 import com.yutadd.model.entity.User;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
@@ -52,6 +56,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	private UserRepository urepository;
 	@Autowired
 	private SessionIDRepository srepository;
+	@Autowired
+	private HistoryRepository hrepository;
 	@Autowired
 	private CommentRepository crepository;
 	@Autowired
@@ -106,19 +112,34 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public ResponseEntity<String> getComment(@RequestParam("cid")String cid) {
 		Comment c;
 		try {
-		c=crepository.findById(cid).get();
+			c=crepository.findById(cid).get();
 		}catch(Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[]");
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(c));
-		
+
 	}
 	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
 	@ResponseBody
 	public String getNewComments(HttpSession session) {
-		List<Comment> newComments=crepository.findComment(Date.valueOf(LocalDate.now().minusDays(1)));
+		String id;
+		try {
+			SessionID s=srepository.findById(session.getId()).get();
+			id=s.getUserID();
+		}catch(Exception e) {
+			id=session.getId();
+		}
+		List<Comment> ret=new ArrayList<Comment>();
+		List<String> newComments=crepository.findNewComment(id,Date.valueOf(LocalDate.now().minusDays(1)));
+		for(String c:newComments) {
+			History h=new History();
+			h.setCid(c);
+			h.setUid(id);
+			ret.add(crepository.findById(c).get());
+			hrepository.save(h);
+		}
 		Gson gson = new Gson();
-		String json = gson.toJson(newComments);
+		String json = gson.toJson(ret);
 		return json;
 	}
 	/*yutadd.yeah*/
@@ -141,7 +162,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value="/get/searchuser",method=RequestMethod.GET)
 	@ResponseBody
 	public String searchUser(@RequestParam("name")String name) {
-		List<User> users=urepository.findUsers(name+"%");
+		List<String> users=urepository.findUsers(name+"%");
 		return new Gson().toJson(users);
 	}
 	@RequestMapping(value="/get/searchemoji",method=RequestMethod.GET)
@@ -168,9 +189,13 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public String getUser(@RequestParam("uid")String uid) {
 		User user=urepository.getUser(uid);
 		UserDetail ud=new UserDetail();
-		ud.setName(user.getName());
-		ud.setUid(uid);
-		return new Gson().toJson(ud);
+		try {
+			ud.setName(user.getName());
+			ud.setUid(uid);
+			return new Gson().toJson(ud);
+		}catch(Exception e) {
+			return "[]";
+		}
 	}
 
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)

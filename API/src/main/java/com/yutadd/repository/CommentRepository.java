@@ -12,6 +12,6 @@ import com.yutadd.model.entity.Comment;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, String>{
-	@Query(value = "select c from Comment c where c.time > ?1 order by c.time")
-	public List<Comment> findComment(Date time);
+	@Query(value = "select commentid from comments left outer join (select cid from history where uid= :id ) as h on (commentid=cid) where cid is null AND time> :date ;",nativeQuery = true)
+	public List<String> findNewComment(@Param("id")String uid,@Param("date")Date d);
 }
