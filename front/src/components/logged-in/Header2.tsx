@@ -18,10 +18,18 @@ import Modal from "@mui/material/Modal";
 import { Autocomplete } from "@mui/material";
 
 export default function Header2() {
-  const [right, setRight, showL, setShowL, name, setName] = useContext(Context);
+  const [
+    right,
+    setRight,
+    showL,
+    setShowL,
+    showS,
+    setShowS,
+    displayId,
+    setDisplayId,
+  ] = useContext(Context);
   const [text, setText] = useState("");
   const [assist, setAssist] = useState([""]);
-
   function json2yaml(detail: JSON): JSX.Element[] {
     const YAML = require("yaml");
     const doc = new YAML.Document();
@@ -144,7 +152,7 @@ export default function Header2() {
           TheAmazingWorldOfEmoji
         </Typography>
         <img src="icon.png" height={30} />
-        <Button>{name}</Button>
+        <Button>{displayId}</Button>
       </Toolbar>
     </>
   ); // TODO:ユーザーの名前のボタンを押したら右画面にユーザーの情報が表示されるようにする。

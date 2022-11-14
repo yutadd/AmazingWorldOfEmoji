@@ -18,8 +18,16 @@ import Modal from "@mui/material/Modal";
 import { Autocomplete } from "@mui/material";
 
 export default function Header1() {
-  const [right, setRight, showL, setShowL, showS, setShowS] =
-    useContext(Context);
+  const [
+    right,
+    setRight,
+    showL,
+    setShowL,
+    showS,
+    setShowS,
+    displayId,
+    setDisplayId,
+  ] = useContext(Context);
   const [text, setText] = useState("");
   const [assist, setAssist] = useState([""]);
 

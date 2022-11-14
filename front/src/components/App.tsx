@@ -18,10 +18,19 @@ export type ContextType = [
   name: string,
   setName: any
 ];
-const shoki: ContextType = [null, null, null, null, null, null, "", null];
+const shoki: ContextType = [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  "username",
+  null,
+];
 export const Context = createContext(shoki);
 function App() {
-  const [id, setName] = useState("");
+  const [displayId, setDisplayId] = useState("default");
   const [right, setRight] = useState(
     <>
       <Paper
@@ -54,8 +63,8 @@ function App() {
     setShowL,
     showS,
     setShowS,
-    id,
-    setName,
+    displayId,
+    setDisplayId,
   ];
   const [header, setHeader] = useState(<Header1 />);
 
@@ -65,8 +74,7 @@ function App() {
         console.log(response);
         let param = response.split(",");
         if (param[1] === "true") {
-          console.log(param[0]);
-          setName(param[0]);
+          setDisplayId(param[0]);
           setHeader(<Header2 />); //ここで引数にユーザーの名前とかつければいい感じ
         } else {
           setHeader(<Header1 />);
@@ -200,7 +208,9 @@ function App() {
     }).then((e) =>
       e.text().then((t) => {
         if (t == "accepted") {
-          setName(id);
+          setDisplayId(id);
+          setShowL(false);
+          console.log("login," + id);
           window.location.reload();
         } else {
           setLoginError("IDかパスワードが間違っています。");
@@ -232,7 +242,9 @@ function App() {
     ).then((e) =>
       e.text().then((t) => {
         if (t == "accepted") {
-          setName(id);
+          setDisplayId(id);
+          setShowS(false);
+          console.log("regist," + id);
           window.location.reload();
         } else {
           setSignError("パラメータに不正な値が含まれています。");
@@ -244,8 +256,8 @@ function App() {
     <>
       <Context.Provider value={init}>
         <header>{header}</header>
-        {id == "" && loginDialog()}
-        {id == "" && signupDialog()}
+        {displayId == "" && loginDialog()}
+        {displayId == "" && signupDialog()}
         <Home />
       </Context.Provider>
     </>

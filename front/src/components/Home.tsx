@@ -4,28 +4,48 @@ import "./Home.css";
 import { Context } from "./App";
 
 import Box from "@mui/material/Box";
+import { CommentSharp } from "@material-ui/icons";
 function Home() {
   const [right, setRight] = useContext(Context);
+  let comments: any;
+  let userNames: string[] = [];
   const [left, setLeft] = useState([<div id="cards"></div>]);
+  let _cards: JSX.Element[] = [];
   useEffect(() => {
-    let _cards = [<></>];
-    fetch("/api/share/get/comments").then((promise) => {
-      promise.json().then((json) => {
-        console.log(json);
-        for (let a = 0; a < json.length; a++) {
-          let uid = json[a]["userID"];
-          fetch("/api/share/get/getuser?uid=" + uid, { mode: "cors" }).then(
-            (prename) => {
-              prename.json().then((user) => {
-                let entity = <CommentCard user={user["name"]} json={json[a]} />;
-                _cards = [..._cards, entity];
-                setLeft(_cards); //then以降はおそらく非同期実行だから、ここでないとからの配列でcardsが上書きされてしまう。
-              });
-            }
-          );
-        }
+    console.log("start effect");
+    setInterval(() => {
+      fetch("/api/share/get/comments").then((promise) => {
+        promise.json().then((json) => {
+          comments = json;
+          for (let a = 0; a < json.length; a++) {
+            let uid = json[a]["userID"];
+            fetch("/api/share/get/getuser?uid=" + uid, { mode: "cors" }).then(
+              (prename) => {
+                prename.json().then((user) => {
+                  userNames.push(user["name"]);
+                });
+              }
+            );
+          }
+        });
       });
-    });
+    }, 5000);
+    setTimeout(() => {
+      setInterval(() => {
+        console.log(comments);
+        for (let i = 0; i < comments.length; i++) {
+          let entity = (
+            <CommentCard
+              key={comments[i]["commentID"]}
+              user={userNames[i]}
+              json={comments[i]}
+            />
+          );
+          _cards.push(entity);
+        }
+        setLeft(_cards);
+      }, 5000);
+    }, 500);
   }, []);
   return (
     <>

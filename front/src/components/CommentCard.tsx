@@ -73,9 +73,10 @@ export default function CommentCard(property: any) {
           <p className="name">{name}</p>
           <p className="user-id">{json["userID"]}</p>
           <Typography
-            onClick={() =>
-              setRight(<ShowDetailRight name={name} json={json} />)
-            }
+            onClick={() => {
+              setRight(<ShowDetailRight name={name} json={json} />);
+              console.log("clicked :" + json["text"]);
+            }}
             className="message"
             style={{ wordBreak: "break-word" }}
             sx={{ mt: "1vh" }}
