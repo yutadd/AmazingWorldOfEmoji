@@ -8,9 +8,10 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 export default function ShowDetailRight(values: any) {
+  console.log(values);
   let name = values.name;
   let json = values.json;
-  const [detailYml, setDetailYml] = useState(json2yaml(json));
+  let detailYml = json2yaml(json);
   function json2yaml(detail: JSON): JSX.Element[] {
     const YAML = require("yaml");
     const doc = new YAML.Document();
@@ -31,7 +32,7 @@ export default function ShowDetailRight(values: any) {
     fetch("/api/share/get/comment?cid=" + json["commentID"]).then((e) => {
       e.json().then((newJson) => {
         json = newJson;
-        setDetailYml(json2yaml(json));
+        detailYml = json2yaml(json);
       });
     });
   }

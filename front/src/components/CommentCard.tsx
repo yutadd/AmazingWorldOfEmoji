@@ -9,6 +9,7 @@ import { Context } from "./App";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 export default function CommentCard(property: any) {
   let name = property.user;
+  console.log("commentcard : " + property.user);
   let json = property.json;
   const [showMe, setShowMe] = useState(true);
   const [right, setRight] = useContext(Context);
