@@ -252,12 +252,13 @@ function App() {
       })
     );
   }
+  console.log("displayid : " + displayId);
   return (
     <>
       <Context.Provider value={init}>
         <header>{header}</header>
-        {displayId == "" && loginDialog()}
-        {displayId == "" && signupDialog()}
+        {displayId == "default" && loginDialog()}
+        {displayId == "default" && signupDialog()}
         <Home />
       </Context.Provider>
     </>

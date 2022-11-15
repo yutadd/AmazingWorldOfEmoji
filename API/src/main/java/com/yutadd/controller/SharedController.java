@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.google.gson.Gson;
+import com.yutadd.model.CommentDetail;
 import com.yutadd.model.EmojiDetail;
 import com.yutadd.model.HistoryRepository;
 import com.yutadd.model.UserDetail;
@@ -111,12 +112,16 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> getComment(@RequestParam("cid")String cid) {
 		Comment c;
+		CommentDetail cd=new CommentDetail();
 		try {
 			c=crepository.findById(cid).get();
+			
+			cd.setC(c);
+			cd.setUsername(urepository.findById(c.getUserID()).get().getName());
 		}catch(Exception e) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[]");
 		}
-		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(c));
+		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
 
 	}
 	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
@@ -131,15 +136,21 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		}
 		List<Comment> ret=new ArrayList<Comment>();
 		List<String> newComments=crepository.findNewComment(id,Date.valueOf(LocalDate.now().minusDays(1)));
+		List<CommentDetail> cd=new ArrayList<CommentDetail>();
 		for(String c:newComments) {
+			Comment cobj=crepository.findById(c).get();
 			History h=new History();
 			h.setCid(c);
 			h.setUid(id);
-			ret.add(crepository.findById(c).get());
+			ret.add(cobj);
 			hrepository.save(h);
+			CommentDetail tmpCd=new CommentDetail();
+			tmpCd.setC(cobj);
+			tmpCd.setUsername(urepository.findById(cobj.getUserID()).get().getName());
+			cd.add(tmpCd);
 		}
 		Gson gson = new Gson();
-		String json = gson.toJson(ret);
+		String json = gson.toJson(cd);
 		return json;
 	}
 	/*yutadd.yeah*/

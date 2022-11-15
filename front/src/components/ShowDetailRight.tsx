@@ -29,7 +29,7 @@ export default function ShowDetailRight(values: any) {
     return ret;
   }
   function update() {
-    fetch("/api/share/get/comment?cid=" + json["commentID"]).then((e) => {
+    fetch("/api/share/get/comment?cid=" + json["c"]["commentID"]).then((e) => {
       e.json().then((newJson) => {
         json = newJson;
         detailYml = json2yaml(json);
@@ -46,7 +46,7 @@ export default function ShowDetailRight(values: any) {
       <CardHeader
         avatar={<Avatar aria-label="recipe">{name.charAt(0)}</Avatar>}
         title={name}
-        subheader={json["uid"]}
+        subheader={json["c"]["uid"]}
       />
 
       <CardContent>

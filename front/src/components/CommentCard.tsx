@@ -11,9 +11,11 @@ export default function CommentCard(property: any) {
   let name = property.user;
   console.log("commentcard : " + property.user);
   let json = property.json;
+  console.log("json:↓");
+  console.log(json);
   const [showMe, setShowMe] = useState(true);
   const [right, setRight] = useContext(Context);
-  const [likes, setlikes] = useState(parseInt(json["likes"]));
+  const [likes, setlikes] = useState(parseInt(json["c"]["likes"]));
   function postLike(cid: string) {
     console.log(cid);
     fetch("/api/share/post/like?cid=" + cid, { method: "POST" }).then((e) =>
@@ -27,13 +29,13 @@ export default function CommentCard(property: any) {
     );
   }
   function update() {
-    fetch("/api/share/get/comment?cid=" + json["commentID"]).then((e) => {
+    fetch("/api/share/get/comment?cid=" + json["c"]["commentID"]).then((e) => {
       e.json().then((newJson) => {
         if (newJson.length == 0) {
           setShowMe(false);
         } else {
           json = newJson;
-          setlikes(parseInt(json["likes"]));
+          setlikes(parseInt(json["c"]["likes"]));
         }
       });
     });
@@ -45,7 +47,7 @@ export default function CommentCard(property: any) {
   }, []);
   return (
     <Paper
-      key={json["commentID"]}
+      key={json["c"]["commentID"]}
       style={{ display: showMe ? "block" : "none" }}
       sx={{
         mt: "0.8vh", //margin-y 8px
@@ -57,7 +59,7 @@ export default function CommentCard(property: any) {
         <Grid sx={{ ml: "1vw", mt: "1vh" }}>
           <Avatar>{name.charAt(0)}</Avatar>
           <IconButton
-            onClick={() => postLike(json["commentID"])}
+            onClick={() => postLike(json["c"]["commentID"])}
             sx={{ mt: "1vh" }}
           >
             <FavoriteBorderIcon></FavoriteBorderIcon>
@@ -72,17 +74,17 @@ export default function CommentCard(property: any) {
         </Grid>
         <Grid width={"auto"} sx={{ my: "0", mx: "1vw" }}>
           <p className="name">{name}</p>
-          <p className="user-id">{json["userID"]}</p>
+          <p className="user-id">{json["c"]["userID"]}</p>
           <Typography
             onClick={() => {
               setRight(<ShowDetailRight name={name} json={json} />);
-              console.log("clicked :" + json["text"]);
+              console.log("clicked :" + json["c"]["text"]);
             }}
             className="message"
             style={{ wordBreak: "break-word" }}
             sx={{ mt: "1vh" }}
           >
-            {json["text"]}
+            {json["c"]["text"]}
           </Typography>
         </Grid>
       </Grid>

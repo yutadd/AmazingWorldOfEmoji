@@ -94,7 +94,6 @@ export default function Header1() {
     <>
       <Toolbar sx={{ height: "6vh", borderBottom: 1, borderColor: "divider" }}>
         <Autocomplete
-          id="first"
           style={{ width: "17vw" }}
           value={text}
           options={assist}
