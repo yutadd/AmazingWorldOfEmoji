@@ -1,6 +1,5 @@
 package com.yutadd.model.entity;
 
-
 import java.io.Serializable;
 
 import javax.persistence.Entity;
@@ -13,14 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="likes")
+@Table(name="history")
 @RequiredArgsConstructor
 @Getter
 @Setter
-@IdClass(value=Like.class)
-public class Like  implements Serializable{
-@Id
-private String userID;
-@Id
-private String commentID;
+@IdClass(value=HistoryKey.class)
+public class History implements Serializable {
+	@Id
+	private String cid;
+	@Id
+	private String uid;
 }
