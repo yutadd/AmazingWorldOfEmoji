@@ -7,7 +7,11 @@ import reportWebVitals from "./reportWebVitals";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
-root.render(<App />);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 // https://bit.ly/CRA-vitals
 reportWebVitals(console.log);
 /*最初の1バイトを受信するまでの時間 / Time to First Byte (TTFB)

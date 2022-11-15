@@ -13,21 +13,11 @@ import CardActions from "@mui/material/CardActions";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import { Context } from "../App";
-import Modal from "@mui/material/Modal";
 
 import { Autocomplete } from "@mui/material";
 
 export default function Header1() {
-  const [
-    right,
-    setRight,
-    showL,
-    setShowL,
-    showS,
-    setShowS,
-    displayId,
-    setDisplayId,
-  ] = useContext(Context);
+  const [setRight, showL, setShowL, showS, setShowS] = useContext(Context);
   const [text, setText] = useState("");
   const [assist, setAssist] = useState([""]);
 
