@@ -33,13 +33,12 @@ public class UserController {
 	@RequestMapping(value="/get/logged",method=RequestMethod.GET)
 	@ResponseBody
 	public String isLogged(HttpSession session) {
-		SessionID s=null;
-		try {
-		s=srepository.findById(session.getId()).get();
-		}catch(Exception e) {
+		if(srepository.existsById(session.getId())) {
+			SessionID s=srepository.findById(session.getId()).get();
+			return s.getUserID()+",true";
+		}else {
 			return "null,false";
 		}
-		return s.getUserID()+",true";
 	}
 	@RequestMapping(value="/post/login")
 	@ResponseBody
@@ -61,24 +60,40 @@ public class UserController {
 	public ResponseEntity<String> registration(HttpSession session,@RequestParam("name") String name,@RequestParam("id") String id,@RequestParam("pass") String pass,@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)@RequestParam("birth") LocalDate birth,@RequestParam("email") String email) {
 		String sessionID=session.getId();
 		User u=new User();
-		if(pass.length()>=8) {
-			if(id.length()>4&&id.matches("[a-z]*[A-Z]*")) {
-				u.setUserid(id);
-				u.setName(name);
-				u.setPassword(new BCryptPasswordEncoder().encode(pass));
-				u.setEmail(email);
-				u.setBirth(Date.valueOf(birth));
-				urepository.save(u);
-				SessionID se=new SessionID();
-				se.setUserID(id);
-				se.setSessionID(sessionID);
-				srepository.save(se);
-				return ResponseEntity.status(HttpStatus.OK).body("accepted");
+		if(!urepository.existsById(id)) {
+			if(pass.length()>=8) {
+				if(id.length()>4&&id.matches("[a-zA-Z]*")) {
+					if(email.matches("^[a-zA-Z0-9_+-]+(.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\\.)+[a-zA-Z]{2,}$")) {
+						if(name.matches("^[0-9a-zA-Z]*")) {
+							if(urepository.countByEmail(email)==0) {
+								u.setUserid(id);
+								u.setName(name);
+								u.setPassword(new BCryptPasswordEncoder().encode(pass));
+								u.setEmail(email);
+								u.setBirth(Date.valueOf(birth));
+								urepository.save(u);
+								SessionID se=new SessionID();
+								se.setUserID(id);
+								se.setSessionID(sessionID);
+								srepository.save(se);
+								return ResponseEntity.status(HttpStatus.OK).body("accepted");
+							}else {
+								return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("EMAIL_ALREADY_EXISTS");
+							}
+						}else {
+							return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("BAD_NAME");
+						}
+					}else {
+						return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_EMAIL");
+					}
+				}else {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_ID");
+				}
 			}else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid ID");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("PASSWORD_TOO_SHORT");
 			}
 		}else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password length liquire 8 or longer.");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ID_ALREDY_EXISTS");
 		}
 	}
 }

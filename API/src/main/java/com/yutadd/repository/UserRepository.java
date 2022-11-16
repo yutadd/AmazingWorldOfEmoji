@@ -10,8 +10,8 @@ import com.yutadd.model.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String>{
-	  @Query("select userid from User u where u.name like %:userid%")
-	    public List<String> findUsers(@Param("userid") String userid);
-		@Query(value = "select u from User u where u.userid = ?1")
-		public User getUser(String uid);
+	  @Query(value="select userid from User u where u.name like ?1")
+	    public List<String> findUsers(String userid);
+	  @Query(value="select count(u) from User u where u.email=?1")
+	  public int countByEmail(String email);
 }

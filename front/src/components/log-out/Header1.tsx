@@ -13,7 +13,6 @@ import CardActions from "@mui/material/CardActions";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import { Context } from "../App";
-import Modal from "@mui/material/Modal";
 
 import { Autocomplete } from "@mui/material";
 
@@ -95,11 +94,16 @@ export default function Header1() {
       <Toolbar sx={{ height: "6vh", borderBottom: 1, borderColor: "divider" }}>
         <Autocomplete
           style={{ width: "17vw" }}
-          value={text}
           options={assist}
           renderInput={(params) => (
             //下            params
-            <TextField {...params} label="emoji searcher" variant="standard" />
+            <TextField
+              {...params}
+              label="search"
+              autoComplete="off"
+              placeholder="userid.title"
+              variant="standard"
+            />
           )}
           renderOption={(props, option: string) => {
             return (
