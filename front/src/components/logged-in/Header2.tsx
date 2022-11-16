@@ -12,6 +12,7 @@ import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
+import "../Header.css";
 import { Context } from "../App";
 import Modal from "@mui/material/Modal";
 
@@ -142,17 +143,19 @@ export default function Header2() {
           <SearchIcon>search</SearchIcon>
         </IconButton>
         <Typography
+          className="title"
           component="h2"
           variant="h5"
           color="inherit"
           align="center"
           noWrap
-          sx={{ flex: 1 }}
+          fontSize={"2vw"}
+          sx={{ flex: 1, ml: "-13.5vw" }}
         >
           TheAmazingWorldOfEmoji
         </Typography>
-        <img src="icon.png" height={30} />
-        <Button>{displayId}</Button>
+        <img style={{ marginLeft: "auto" }} src="icon.png" height={30} />
+        <Button sx={{ ml: "auto" }}>{displayId}</Button>
       </Toolbar>
     </>
   ); // TODO:ユーザーの名前のボタンを押したら右画面にユーザーの情報が表示されるようにする。

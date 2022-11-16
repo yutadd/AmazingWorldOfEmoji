@@ -11,10 +11,12 @@ import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import Grid from "@mui/material/Grid";
+import ".././Header.css";
 import Avatar from "@mui/material/Avatar";
 import { Context } from "../App";
 
 import { Autocomplete } from "@mui/material";
+import { sizeWidth } from "@mui/system";
 
 export default function Header1() {
   const [
@@ -39,7 +41,7 @@ export default function Header1() {
     spl.map((e) => {
       ret.push(
         <React.Fragment key={e}>
-          {e}
+          {e.replace(" ", "　")}
           <br />
         </React.Fragment>
       );
@@ -145,18 +147,12 @@ export default function Header1() {
         >
           <SearchIcon>search</SearchIcon>
         </IconButton>
-        <Typography
-          component="h2"
-          variant="h5"
-          color="inherit"
-          align="center"
-          noWrap
-          sx={{ flex: 1 }}
-        >
-          TheAmazingWorldOfEmoji
+        <Typography color="inherit" textAlign="center" noWrap sx={{ flex: 1 }}>
+          <span className="title">TheAmazingWorldOfEmoji</span>
         </Typography>
-        <img src="icon.png" height={30} />
+        <img style={{ marginLeft: "auto" }} src="icon.png" height={30} />
         <Button
+          sx={{ ml: "auto", mr: "0px" }}
           onClick={() => {
             if (!showL) {
               setShowL(true);
@@ -169,6 +165,7 @@ export default function Header1() {
           log-in
         </Button>
         <Button
+          sx={{ ml: "auto", mr: "0px" }}
           onClick={() => {
             if (!showS) {
               setShowS(true);

@@ -21,7 +21,7 @@ export default function ShowDetailRight(values: any) {
     spl.map((e) => {
       ret.push(
         <React.Fragment key={e}>
-          {e}
+          {e.replace(" ", "　")}
           <br />
         </React.Fragment>
       );

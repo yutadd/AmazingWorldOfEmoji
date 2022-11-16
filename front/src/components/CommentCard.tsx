@@ -20,7 +20,7 @@ export default function CommentCard(property: any) {
     console.log(cid);
     fetch("/api/share/post/like?cid=" + cid, { method: "POST" }).then((e) =>
       e.text().then((t) => {
-        if (t == "liked") {
+        if (t == "OK") {
           setlikes(likes + 1);
         } else {
           alert("ログインして実行してください。");

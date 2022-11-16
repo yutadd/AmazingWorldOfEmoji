@@ -47,8 +47,9 @@ function Home() {
       <Box sx={{ pt: "1vh" }} className="left">
         {cards}
       </Box>
-
-      <Box className="left">{right}</Box>
+      <Box sx={{ pt: "1vh" }} className="left">
+        {right}
+      </Box>
     </>
   );
 }

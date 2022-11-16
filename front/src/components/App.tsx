@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
+import Grid from "@mui/material/Grid";
 import "./App.css";
 export type ContextType = [
   right: any,
@@ -85,38 +86,43 @@ function App() {
   function loginDialog() {
     return (
       <Card
+        className="dialog"
         style={{
           display: showL ? "block" : "none",
           zIndex: 99,
           position: "absolute",
         }}
-        sx={{ ml: "80vw", pr: "1vw", pt: "2vh", pl: "2vw", pb: "2vh" }}
       >
-        <TextField
-          sx={{ pb: "1vh" }}
-          autoComplete="id"
-          type={"text"}
-          placeholder="ID"
-          onChange={(e) => {
-            setLoginInputID(e.target.value);
-          }}
-        />
-        <TextField
-          sx={{ pb: "1vh" }}
-          autoComplete="password"
-          placeholder="password"
-          type={"password"}
-          onChange={(e) => {
-            setLoginInputPass(e.target.value);
-          }}
-        />
-        <br />
-        <Button
-          variant="contained"
-          onClick={() => login(inputLoginID, inputLoginPass)}
-        >
-          Login&gt;&gt;
-        </Button>
+        <Grid style={{ textAlign: "left" }} sx={{ px: "1vw" }}>
+          <TextField
+            sx={{ pt: "1vh", pb: "1vh", width: "100%" }}
+            autoComplete="id"
+            type={"text"}
+            placeholder="ID"
+            onChange={(e) => {
+              setLoginInputID(e.target.value);
+            }}
+          />
+          <br />
+          <TextField
+            sx={{ pb: "1vh", width: "100%" }}
+            autoComplete="password"
+            placeholder="password"
+            type={"password"}
+            onChange={(e) => {
+              setLoginInputPass(e.target.value);
+            }}
+          />
+
+          <br />
+          <Button
+            sx={{ mb: "1vh" }}
+            variant="contained"
+            onClick={() => login(inputLoginID, inputLoginPass)}
+          >
+            Login&gt;&gt;
+          </Button>
+        </Grid>
         <Typography style={{ color: "red" }}>{loginError}</Typography>
       </Card>
     );
@@ -124,78 +130,85 @@ function App() {
   function signupDialog() {
     return (
       <Card
+        className="dialog"
         style={{
           display: showS ? "block" : "none",
           zIndex: 99,
           position: "absolute",
         }}
-        sx={{ ml: "80vw", pr: "1vw", pt: "2vh", pl: "2vw", pb: "2vh" }}
       >
-        <TextField
-          sx={{ pb: "1vh" }}
-          value={inputSignID}
-          type={"text"}
-          id={"name"}
-          placeholder="userID"
-          onChange={(e) => {
-            setSignInputID(e.target.value);
-          }}
-        />
-        <TextField
-          sx={{ pb: "1vh" }}
-          value={inputSignPass}
-          placeholder="password"
-          type={"password"}
-          id={"password"}
-          onChange={(e) => {
-            setSignInputPass(e.target.value);
-          }}
-        />
-        <TextField
-          sx={{ pb: "1vh" }}
-          value={inputSignName}
-          placeholder="display name"
-          type={"text"}
-          id={"nickname"}
-          onChange={(e) => {
-            setSignInputName(e.target.value);
-          }}
-        />
-        <TextField
-          sx={{ pb: "1vh" }}
-          value={inputSignEmail}
-          placeholder="email"
-          type={"email"}
-          id={"email"}
-          onChange={(e) => {
-            setSignInputEmail(e.target.value);
-          }}
-        />
-        <TextField
-          sx={{ pb: "1vh" }}
-          value={inputSignBirth}
-          placeholder="birth"
-          type={"date"}
-          id={"birthday"}
-          onChange={(e) => {
-            setSignInputBirth(e.target.value);
-          }}
-        />
-        <br />
-        <Button
-          variant="contained"
-          onClick={() =>
-            signup(
-              inputSignID,
-              inputSignPass,
-              inputSignName,
-              inputSignEmail,
-              inputSignBirth
-            )
-          } //TODO:　sign up に変更
-        >
-          SignUp&gt;&gt;
-        </Button>
+        <Grid style={{ textAlign: "left" }} sx={{ px: "1vw" }}>
+          <TextField
+            sx={{ mt: "1vh", pb: "1vh", width: "100%" }}
+            value={inputSignID}
+            type={"text"}
+            id={"name"}
+            placeholder="userID"
+            onChange={(e) => {
+              setSignInputID(e.target.value);
+            }}
+          />
+          <br />
+          <TextField
+            sx={{ pb: "1vh", width: "100%" }}
+            value={inputSignPass}
+            placeholder="password"
+            type={"password"}
+            id={"password"}
+            onChange={(e) => {
+              setSignInputPass(e.target.value);
+            }}
+          />
+          <br />
+          <TextField
+            sx={{ pb: "1vh", width: "100%" }}
+            value={inputSignName}
+            placeholder="display name"
+            type={"text"}
+            id={"nickname"}
+            onChange={(e) => {
+              setSignInputName(e.target.value);
+            }}
+          />
+          <br />
+          <TextField
+            sx={{ pb: "1vh", width: "100%" }}
+            value={inputSignEmail}
+            placeholder="email"
+            type={"email"}
+            id={"email"}
+            onChange={(e) => {
+              setSignInputEmail(e.target.value);
+            }}
+          />
+          <br />
+          <TextField
+            sx={{ pb: "1vh", width: "100%" }}
+            value={inputSignBirth}
+            placeholder="birth"
+            type={"date"}
+            id={"birthday"}
+            onChange={(e) => {
+              setSignInputBirth(e.target.value);
+            }}
+          />
+          <br />
+          <Button
+            sx={{ mb: "1vh", width: "100%" }}
+            variant="contained"
+            onClick={() =>
+              signup(
+                inputSignID,
+                inputSignPass,
+                inputSignName,
+                inputSignEmail,
+                inputSignBirth
+              )
+            } //TODO:　sign up に変更
+          >
+            SignUp&gt;&gt;
+          </Button>
+        </Grid>
         <Typography style={{ color: "red" }}>{SignError}</Typography>
       </Card>
     );
