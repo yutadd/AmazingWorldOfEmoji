@@ -10,9 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -65,73 +67,87 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	private LikeRepository lrepository;
 	@RequestMapping(value="/post/message", method=RequestMethod.POST)
 	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files")String files,HttpSession session) {
-		try {
-			String[] fileargs=files.split(Pattern.quote(";"));
-			String uid=srepository.findById(session.getId()).get().getUserID();
-			Random rn = new Random();
-			BigInteger cID= new BigInteger(255,rn);
-			Comment c=new Comment();
-			c.setUserID(uid);
-			c.setCommentID(cID.toString(16));
-			c.setText(message);
-			c.setFile1(fileargs[0]);
-			c.setFile1(fileargs[1]);
-			c.setFile1(fileargs[2]);
-			c.setFile1(fileargs[3]);
-			c.setTime(Date.valueOf(LocalDate.now()));
-			crepository.save(c);
-			return new ResponseEntity<>(HttpStatus.OK);
-		}catch(Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください");
+		String[] fileargs=files.split(";");
+		if(fileargs.length==4) {
+			boolean filecheck=true;
+			for (String string : fileargs) {
+				if(!string.matches("^[0-9a-fA-F]*")&&!string.equals("none")) {
+					filecheck=false;
+				}
+			}
+			if(filecheck) {
+				message=message.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("&", "&amp;");
+				if(srepository.existsById(session.getId())) {
+					String uid=srepository.findById(session.getId()).get().getUserID();
+					Random rn = new Random();
+					BigInteger cID= new BigInteger(255,rn);
+					Comment c=new Comment();
+					c.setUserID(uid);
+					c.setCommentID(cID.toString(16));
+					c.setText(message);
+					c.setFile1(fileargs[0]);
+					c.setFile2(fileargs[1]);
+					c.setFile3(fileargs[2]);
+					c.setFile4(fileargs[3]);
+					c.setTime(Date.valueOf(LocalDate.now()));
+					crepository.save(c);
+					return ResponseEntity.status(HttpStatus.OK).body("OK");
+				}else {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
+				}
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILEID");
+			}
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILE_AMOUNT");
 		}
 	}
 	@RequestMapping(value="/post/like",method=RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<String>  getNewPosts(HttpSession session,@RequestParam("cid")String cid) {
-		Like l=new Like();
-		l.setCommentID(cid);
-		try {
-			l.setUserID(srepository.findById(session.getId()).get().getUserID());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ログインして実行してください。");
+		if(crepository.existsById(cid)) {
+			Like l=new Like();
+			l.setCommentID(cid);
+			if(srepository.existsById(session.getId())) {
+				l.setUserID(srepository.findById(session.getId()).get().getUserID());
+				Comment c=crepository.findById(cid).get();
+				c.setLikes((c.getLikes()+1));
+				crepository.save(c);
+				lrepository.save(l);
+				return ResponseEntity.status(HttpStatus.OK).body("OK");
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
+			}
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
 		}
-		Comment c=null;
-		try {
-			c=crepository.findById(cid).get();
-		}catch(Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("一致するコメントが見つかりません。");
-		}
-		c.setLikes((c.getLikes()+1));
-		crepository.save(c);
-		lrepository.save(l);
-		return ResponseEntity.status(HttpStatus.OK).body("liked");
 	}
 	@RequestMapping(value="/get/comment")
 	@ResponseBody
 	public ResponseEntity<String> getComment(@RequestParam("cid")String cid) {
 		Comment c;
 		CommentDetail cd=new CommentDetail();
-		try {
+		if(crepository.existsById(cid)) {
 			c=crepository.findById(cid).get();
-			
-			cd.setC(c);
-			cd.setUsername(urepository.findById(c.getUserID()).get().getName());
-		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("[]");
+			if(urepository.existsById(c.getUserID())) {
+				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
+				cd.setC(c);
+				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
+			}
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
 		}
-		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
-
 	}
 	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
 	@ResponseBody
 	public String getNewComments(HttpSession session) {
 		String id;
-		try {
+		if(srepository.existsById(session.getId())) {
 			SessionID s=srepository.findById(session.getId()).get();
 			id=s.getUserID();
-		}catch(Exception e) {
+		}else {
 			id=session.getId();
 		}
 		List<Comment> ret=new ArrayList<Comment>();
@@ -142,6 +158,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			History h=new History();
 			h.setCid(c);
 			h.setUid(id);
+			h.setDate(new Time(System.currentTimeMillis()));
 			ret.add(cobj);
 			hrepository.save(h);
 			CommentDetail tmpCd=new CommentDetail();
@@ -156,14 +173,23 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	/*yutadd.yeah*/
 	@RequestMapping(value="/get/emoji",method=RequestMethod.GET)
 	@ResponseBody
-	public byte[] emojiImage(@RequestParam("emoji")String emojiPath,@RequestParam("type")String type) {
+	public ResponseEntity<byte[]> emojiImage(@RequestParam("emoji")String emojiPath,@RequestParam("type")String type) {
 		try {
 			String[] str1=emojiPath.split(Pattern.quote("."));
-			FileInputStream fis=new FileInputStream(new File("user"+File.separator+str1[0]+File.separator+str1[1]+"."+type));
-			return IOUtils.toByteArray(fis);
+			if(str1.length==2) {
+				File imageFile=new File("user"+File.separator+str1[0]+File.separator+str1[1]+"."+type);
+				if(imageFile.exists()) {
+					FileInputStream fis=new FileInputStream(imageFile);
+					return ResponseEntity.status(HttpStatus.OK).body(IOUtils.toByteArray(fis));
+				}else {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND".getBytes());
+				}
+			}else {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_PATH_FORMAT".getBytes());
+			}
 		}catch(Exception e) {
 			e.printStackTrace();
-			return "404".getBytes();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("UNKNOWN_ERROR".getBytes());
 		}
 	}
 	/*
@@ -184,63 +210,74 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	}
 	@RequestMapping(value="/get/getEmojiDetail",method=RequestMethod.GET)
 	@ResponseBody
-	public String getEmojiDetail(@RequestParam("path")String path) {
-		Emoji e=erepository.getEmoji(path);
-		User u=urepository.getUser(e.getUserID());
-		EmojiDetail ud=new EmojiDetail();
-		ud.setUserName(u.getName());
-		ud.setUserID(u.getUserid());
-		ud.setPath(path);
-		ud.setTitle(e.getTitle());
-		ud.setType(e.getType());
-		return new Gson().toJson(ud);
+	public ResponseEntity<String> getEmojiDetail(@RequestParam("path")String path) {
+		if(erepository.existsById(path)) {
+			Emoji e=erepository.findById(path).get();
+			User u=urepository.findById(e.getUserID()).get();
+			EmojiDetail ud=new EmojiDetail();
+			ud.setUserName(u.getName());
+			ud.setUserID(u.getUserid());
+			ud.setPath(path);
+			ud.setTitle(e.getTitle());
+			ud.setType(e.getType());
+			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(ud));
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND");
+		}
+
 	}
 	@RequestMapping(value="/get/getuser",method=RequestMethod.GET)
 	@ResponseBody
-	public String getUser(@RequestParam("uid")String uid) {
-		User user=urepository.getUser(uid);
-		UserDetail ud=new UserDetail();
-		try {
+	public ResponseEntity<String> getUser(@RequestParam("uid")String uid) {
+		if(urepository.existsById(uid)) {
+			User user=urepository.findById(uid).get();
+			UserDetail ud=new UserDetail();
 			ud.setName(user.getName());
 			ud.setUid(uid);
-			return new Gson().toJson(ud);
-		}catch(Exception e) {
-			return "[]";
+			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(ud));
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND");
 		}
 	}
 
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
-	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session,@RequestParam("type") String type) {
+	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session) {
 		if(srepository.existsById(session.getId())) {
-			if(title.matches("[a-z]*[A-Z]*")) {
-				try {
-					String uid=srepository.findById(session.getId()).get().getUserID();
-					String replacesuid=uid.replace("@","");
-					Path path=Paths.get(replacesuid);
-					File file=new File("user"+File.separator+replacesuid+File.separator+title+"."+type);
-					Files.createDirectories(path);
-					//f.createNewFile();
-					OutputStream output=new FileOutputStream(file);
-					output.write(imageFile.getBytes());
-					output.flush();
-					output.close();
-					Emoji emoji=new Emoji();
-					emoji.setPopularity(0);
-					emoji.setType(type);
-					emoji.setTitle(title);
-					emoji.setUserID(uid);
-					emoji.setPath(replacesuid+"."+title);
-					erepository.save(emoji);
-					return new ResponseEntity<>(HttpStatus.ACCEPTED);
-				} catch (IOException e) {
-					e.printStackTrace();
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ERROR on doing"+e.getLocalizedMessage());
+			String uid=srepository.findById(session.getId()).get().getUserID();
+			String replacesuid=uid.replace("@","");
+			if(title.matches("[a-zA-Z]*")) {
+				String contentType=imageFile.getContentType().split("/")[0];
+				String fileType=imageFile.getContentType().split("/")[1];
+				if(contentType.equals("image")) {
+					try {
+						Path path=Paths.get(replacesuid);
+						File file=new File("user"+File.separator+replacesuid+File.separator+title+"."+fileType);
+						Files.createDirectories(path);
+						//f.createNewFile();
+						OutputStream output=new FileOutputStream(file);
+						output.write(imageFile.getBytes());
+						output.flush();
+						output.close();
+						Emoji emoji=new Emoji();
+						emoji.setPopularity(0);
+						emoji.setType(fileType);
+						emoji.setTitle(title);
+						emoji.setUserID(uid);
+						emoji.setPath(replacesuid+"."+title);
+						erepository.save(emoji);
+						return new ResponseEntity<>(HttpStatus.OK);
+					} catch (IOException e) {
+						e.printStackTrace();
+						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("UNKNOWN_ERROR");
+					}
+				}else {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_CONTENT_TYPE");
 				}
 			}else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("タイトルに不正な値が入っています。");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_TITLE");
 			}
 		}else {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("ログインして実行してください");
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("INVALID_AUTH");
 		}
 	}
 }

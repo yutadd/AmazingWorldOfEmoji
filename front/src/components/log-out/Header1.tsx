@@ -17,7 +17,16 @@ import { Context } from "../App";
 import { Autocomplete } from "@mui/material";
 
 export default function Header1() {
-  const [setRight, showL, setShowL, showS, setShowS] = useContext(Context);
+  const [
+    right,
+    setRight,
+    showL,
+    setShowL,
+    showS,
+    setShowS,
+    displayId,
+    setDisplayId,
+  ] = useContext(Context);
   const [text, setText] = useState("");
   const [assist, setAssist] = useState([""]);
 
@@ -85,11 +94,16 @@ export default function Header1() {
       <Toolbar sx={{ height: "6vh", borderBottom: 1, borderColor: "divider" }}>
         <Autocomplete
           style={{ width: "17vw" }}
-          value={text}
           options={assist}
           renderInput={(params) => (
             //下            params
-            <TextField {...params} label="emoji searcher" variant="standard" />
+            <TextField
+              {...params}
+              label="search"
+              autoComplete="off"
+              placeholder="userid.title"
+              variant="standard"
+            />
           )}
           renderOption={(props, option: string) => {
             return (

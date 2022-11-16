@@ -17,11 +17,11 @@ import lombok.Setter;
 public class Emoji {
 	@NotBlank
 	private String userID;
-	@Id
 	@NotBlank
 	private String title;
 	@NotBlank
 	private String type;
+	@Id
 	@NotBlank
 	private String path;
 	private long popularity;

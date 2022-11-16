@@ -5,7 +5,16 @@ import { Context } from "./App";
 import Box from "@mui/material/Box";
 
 function Home() {
-  const [right, setRight] = useContext(Context);
+  const [
+    right,
+    setRight,
+    showL,
+    setShowL,
+    showS,
+    setShowS,
+    displayId,
+    setDisplayId,
+  ] = useContext(Context);
   const [cards, setCards] = useState<JSX.Element[]>([<></>]);
 
   useEffect(() => {

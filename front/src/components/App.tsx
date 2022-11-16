@@ -94,20 +94,18 @@ function App() {
       >
         <TextField
           sx={{ pb: "1vh" }}
-          value={inputLoginID}
+          autoComplete="id"
           type={"text"}
-          id={"name"}
-          placeholder="userID"
+          placeholder="ID"
           onChange={(e) => {
             setLoginInputID(e.target.value);
           }}
         />
         <TextField
           sx={{ pb: "1vh" }}
-          value={inputLoginPass}
+          autoComplete="password"
           placeholder="password"
           type={"password"}
-          id={"password"}
           onChange={(e) => {
             setLoginInputPass(e.target.value);
           }}
@@ -213,7 +211,7 @@ function App() {
           console.log("login," + id);
           window.location.reload();
         } else {
-          setLoginError("IDかパスワードが間違っています。");
+          setLoginError(t);
         }
       })
     );
@@ -247,7 +245,7 @@ function App() {
           console.log("regist," + id);
           window.location.reload();
         } else {
-          setSignError("パラメータに不正な値が含まれています。");
+          setSignError(t);
         }
       })
     );
@@ -257,8 +255,8 @@ function App() {
     <>
       <Context.Provider value={init}>
         <header>{header}</header>
-        {displayId == "default" && loginDialog()}
-        {displayId == "default" && signupDialog()}
+        {displayId === "default" && loginDialog()}
+        {displayId === "default" && signupDialog()}
         <Home />
       </Context.Provider>
     </>

@@ -11,7 +11,5 @@ import com.yutadd.model.entity.Emoji;
 public interface EmojiRepository extends JpaRepository<Emoji,String> {
 	 @Query(value="select e.path from Emoji e where e.path like ?1")
 	 public List<String> findEmoji(String path);
-	 @Query(value = "select e from Emoji e where e.path = ?1")
-	 public Emoji getEmoji(String path);
 	 
 }

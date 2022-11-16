@@ -1,6 +1,7 @@
 package com.yutadd.model.entity;
 
 import java.io.Serializable;
+import java.sql.Time;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,8 +19,10 @@ import lombok.Setter;
 @Setter
 @IdClass(value=HistoryKey.class)
 public class History implements Serializable {
-	@Id
+	
 	private String cid;
 	@Id
 	private String uid;
+	@Id
+	private Time date;
 }
