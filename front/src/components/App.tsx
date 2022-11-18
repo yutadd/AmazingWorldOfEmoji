@@ -7,7 +7,10 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
+import PostAddIcon from "@mui/icons-material/PostAdd";
 import Grid from "@mui/material/Grid";
+import Post from "./Post";
+
 import "./App.css";
 export type ContextType = [
   right: any,
@@ -49,13 +52,14 @@ function App() {
   const [inputLoginID, setLoginInputID] = useState("");
   const [inputLoginPass, setLoginInputPass] = useState("");
   const [loginError, setLoginError] = useState("");
-
+  const [showPost, setShowPost] = useState(false);
   const [showS, setShowS] = useState(false);
   const [inputSignID, setSignInputID] = useState("");
   const [inputSignPass, setSignInputPass] = useState("");
   const [inputSignName, setSignInputName] = useState("");
   const [inputSignEmail, setSignInputEmail] = useState("");
   const [inputSignBirth, setSignInputBirth] = useState("");
+
   const [SignError, setSignError] = useState("");
   let init: ContextType = [
     right,
@@ -263,6 +267,18 @@ function App() {
       })
     );
   }
+  function StartPostButton() {
+    return (
+      <PostAddIcon
+        onClick={() => {
+          setShowPost(true);
+        }}
+        color="action"
+        sx={{ fontSize: "15vh" }}
+        style={{ position: "fixed", paddingTop: "75vh" }}
+      ></PostAddIcon>
+    );
+  }
   console.log("displayid : " + displayId);
   return (
     <>
@@ -270,6 +286,11 @@ function App() {
         <header>{header}</header>
         {displayId === "default" && loginDialog()}
         {displayId === "default" && signupDialog()}
+        {displayId !== "default" && (
+          <Post show={showPost} setShow={setShowPost} />
+        )}
+        {displayId !== "default" && <StartPostButton />}
+
         <Home />
       </Context.Provider>
     </>
