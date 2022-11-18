@@ -65,7 +65,6 @@ export default function Post(props: any) {
             contentEditable="true"
             spellCheck="true"
             style={{
-              outline: "none",
               overflowY: "scroll",
               fontSize: "25px",
               marginLeft: "30vw",
@@ -74,8 +73,7 @@ export default function Post(props: any) {
               resize: "none",
               width: "40vw",
               borderRadius: "16px",
-              borderColor: "gray",
-              borderWidth: "3px",
+              border:"2px solid gray",
               height: "160px",
             }}
           />
