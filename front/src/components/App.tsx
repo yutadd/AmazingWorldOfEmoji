@@ -38,6 +38,7 @@ function App() {
   const [right, setRight] = useState(
     <>
       <Paper
+        style={{ color: "#9C27B0", fontSize: "1.3vw", fontWeight: "500" }}
         sx={{
           mt: "2vh", //margin-y 8px
           mx: 1, //margin-x
@@ -92,6 +93,7 @@ function App() {
       <Card
         className="dialog"
         style={{
+          right: 0,
           display: showL ? "block" : "none",
           zIndex: 99,
           position: "absolute",
@@ -136,6 +138,7 @@ function App() {
       <Card
         className="dialog"
         style={{
+          right: 0,
           display: showS ? "block" : "none",
           zIndex: 99,
           position: "absolute",
@@ -270,12 +273,17 @@ function App() {
   function StartPostButton() {
     return (
       <PostAddIcon
+        color="secondary"
         onClick={() => {
           setShowPost(true);
         }}
-        color="action"
         sx={{ fontSize: "15vh" }}
-        style={{ position: "fixed", paddingTop: "75vh" }}
+        style={{
+          left: 0,
+          bottom: 0,
+          position: "fixed",
+          //paddingTop: "75vh",
+        }}
       ></PostAddIcon>
     );
   }
@@ -289,6 +297,7 @@ function App() {
         {displayId !== "default" && (
           <Post show={showPost} setShow={setShowPost} />
         )}
+
         {displayId !== "default" && <StartPostButton />}
 
         <Home />

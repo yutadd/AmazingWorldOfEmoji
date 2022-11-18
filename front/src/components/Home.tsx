@@ -29,7 +29,7 @@ function Home() {
             console.log(json[a]);
             tmp.push(
               <CommentCard
-                key={json[a]["c"]["commentID"]}
+                key={json[a]["commentInfo"]["commentID"]}
                 user={json[a]["username"]}
                 json={json[a]}
               />
@@ -39,7 +39,7 @@ function Home() {
         }
       };
       getter();
-    }, 5000);
+    }, 1000);
   }, []);
 
   return (

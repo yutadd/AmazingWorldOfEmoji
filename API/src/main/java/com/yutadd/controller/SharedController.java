@@ -124,14 +124,31 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	}
 	@RequestMapping(value="/get/comment")
 	@ResponseBody
-	public ResponseEntity<String> getComment(@RequestParam("cid")String cid) {
+	public ResponseEntity<String> getComment(HttpSession session,@RequestParam("cid")String cid) {
 		Comment c;
+		String uid="";
+		if(srepository.existsById(session.getId())) {
+			uid=srepository.findById(session.getId()).get().getUserID();
+		}
 		CommentDetail cd=new CommentDetail();
 		if(crepository.existsById(cid)) {
 			c=crepository.findById(cid).get();
 			if(urepository.existsById(c.getUserID())) {
+				List<Like>likes=lrepository.findAllByCID(cid);
+				if(!uid.equals("")&&!likes.isEmpty()) {
+					for(Like l:likes) {
+						if(l.getUserID().equals(uid)) {
+							cd.setLiked("true");
+							break;
+						}else {
+							cd.setLiked("false");
+						}
+					}
+					}else {
+						cd.setLiked("false");
+					}
 				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
-				cd.setC(c);
+				cd.setCommentInfo(c);
 				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
 			}else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
@@ -162,7 +179,20 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			ret.add(cobj);
 			hrepository.save(h);
 			CommentDetail tmpCd=new CommentDetail();
-			tmpCd.setC(cobj);
+			tmpCd.setCommentInfo(cobj);
+			List<Like>likes=lrepository.findAllByCID(c);
+			if(!likes.isEmpty()) {
+			for(Like l:likes) {
+				if(l.getUserID().equals(id)) {
+					tmpCd.setLiked("true");
+					break;
+				}else {
+					tmpCd.setLiked("false");
+				}
+			}
+			}else {
+				tmpCd.setLiked("false");
+			}
 			tmpCd.setUsername(urepository.findById(cobj.getUserID()).get().getName());
 			cd.add(tmpCd);
 		}
@@ -239,7 +269,11 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND");
 		}
 	}
-
+	@RequestMapping(value="/get/likes")
+	public ResponseEntity<String> getLikes(@RequestParam("cid")String cid){
+		List<Like> likelist=lrepository.findAllByCID(cid);
+		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(likelist));
+	}
 	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session) {
 		if(srepository.existsById(session.getId())) {

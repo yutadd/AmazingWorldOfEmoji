@@ -4,9 +4,11 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
+import { orange, purple } from "@mui/material/colors";
 import ShowDetailRight from "./ShowDetailRight";
 import { Context } from "./App";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 export default function CommentCard(property: any) {
   let name = property.user;
   console.log("commentcard : " + property.user);
@@ -15,13 +17,15 @@ export default function CommentCard(property: any) {
   console.log(json);
   const [showMe, setShowMe] = useState(true);
   const [right, setRight] = useContext(Context);
-  const [likes, setlikes] = useState(parseInt(json["c"]["likes"]));
+  const [liked, setLiked] = useState(false);
+  const [likes, setlikes] = useState(parseInt(json["commentInfo"]["likes"]));
   function postLike(cid: string) {
     console.log(cid);
     fetch("/api/share/post/like?cid=" + cid, { method: "POST" }).then((e) =>
       e.text().then((t) => {
         if (t == "OK") {
           setlikes(likes + 1);
+          setLiked(true);
         } else {
           alert("ログインして実行してください。");
         }
@@ -29,25 +33,37 @@ export default function CommentCard(property: any) {
     );
   }
   function update() {
-    fetch("/api/share/get/comment?cid=" + json["c"]["commentID"]).then((e) => {
+    fetch(
+      "/api/share/get/comment?cid=" + json["commentInfo"]["commentID"]
+    ).then((e) => {
       e.json().then((newJson) => {
         if (newJson.length == 0) {
           setShowMe(false);
         } else {
           json = newJson;
-          setlikes(parseInt(json["c"]["likes"]));
+          if (newJson["liked"] === "true") {
+            setLiked(true);
+          } else {
+            setLiked(false);
+          }
+          setlikes(parseInt(json["commentInfo"]["likes"]));
         }
       });
     });
   }
   useEffect(() => {
+    if (json["liked"] === "true") {
+      setLiked(true);
+    } else {
+      setLiked(false);
+    }
     setInterval(() => {
       update();
     }, 5000);
   }, []);
   return (
     <Paper
-      key={json["c"]["commentID"]}
+      key={json["commentInfo"]["commentID"]}
       style={{ display: showMe ? "block" : "none" }}
       sx={{
         mt: "0.8vh", //margin-y 8px
@@ -58,12 +74,21 @@ export default function CommentCard(property: any) {
       <Grid container wrap="nowrap" spacing={2}>
         <Grid sx={{ ml: "1vw", mt: "1vh" }}>
           <Avatar>{name.charAt(0)}</Avatar>
-          <IconButton
-            onClick={() => postLike(json["c"]["commentID"])}
-            sx={{ mt: "1vh" }}
-          >
-            <FavoriteBorderIcon></FavoriteBorderIcon>
-          </IconButton>
+
+          {liked ? (
+            <IconButton sx={{ color: purple[500], mt: "1vh" }} disabled>
+              <FavoriteIcon sx={{ color: purple[500], mt: "1vh" }} />
+            </IconButton>
+          ) : (
+            <IconButton
+              onClick={(e) => {
+                postLike(json["commentInfo"]["commentID"]);
+              }}
+              sx={{ color: purple[500], mt: "1vh" }}
+            >
+              <FavoriteBorderIcon sx={{ color: purple[500], mt: "1vh" }} />
+            </IconButton>
+          )}
           <Typography
             textAlign={"center"}
             sx={{ mt: "-1vh" }}
@@ -74,17 +99,17 @@ export default function CommentCard(property: any) {
         </Grid>
         <Grid width={"auto"} sx={{ my: "0", mx: "1vw" }}>
           <p className="name">{name}</p>
-          <p className="user-id">{json["c"]["userID"]}</p>
+          <p className="user-id">{json["commentInfo"]["userID"]}</p>
           <Typography
             onClick={() => {
               setRight(<ShowDetailRight name={name} json={json} />);
-              console.log("clicked :" + json["c"]["text"]);
+              console.log("clicked :" + json["commentInfo"]["text"]);
             }}
             className="message"
             style={{ wordBreak: "break-word" }}
             sx={{ mt: "1vh" }}
           >
-            {json["c"]["text"]}
+            {json["commentInfo"]["text"]}
           </Typography>
         </Grid>
       </Grid>

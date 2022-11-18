@@ -17,7 +17,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@IdClass(value=HistoryKey.class)
+@IdClass(HistoryKey.class)
 public class History implements Serializable {
 	
 	private String cid;

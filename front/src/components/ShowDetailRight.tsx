@@ -29,7 +29,9 @@ export default function ShowDetailRight(values: any) {
     return ret;
   }
   function update() {
-    fetch("/api/share/get/comment?cid=" + json["c"]["commentID"]).then((e) => {
+    fetch(
+      "/api/share/get/comment?cid=" + json["commentInfo"]["commentID"]
+    ).then((e) => {
       e.json().then((newJson) => {
         json = newJson;
         detailYml = json2yaml(json);
@@ -44,18 +46,14 @@ export default function ShowDetailRight(values: any) {
   return (
     <Card sx={{ mt: "1vh" }}>
       <CardHeader
+        sx={{ pb: "0px" }}
         avatar={<Avatar aria-label="recipe">{name.charAt(0)}</Avatar>}
         title={name}
-        subheader={json["c"]["uid"]}
+        subheader={json["commentInfo"]["uid"]}
       />
-
-      <CardContent>
+      <CardContent sx={{ pb: "0px" }}>
         <Grid width={"90%"} sx={{ my: "0", mx: "1vw" }}>
-          <Typography
-            style={{ wordBreak: "break-word" }}
-            className="message"
-            sx={{ mt: "2vh" }}
-          >
+          <Typography style={{ wordBreak: "break-word" }} className="message">
             {detailYml}
           </Typography>
         </Grid>
@@ -64,7 +62,9 @@ export default function ShowDetailRight(values: any) {
         component="img"
         height="194"
         image={
-          "https://i.pinimg.com/originals/e5/15/ef/e515efa787e87387a6223f103c39913b.jpg"
+          json["commentInfo"]["file1"] === "none"
+            ? "data:image/bmp;base64,Qk06AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABABgAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAA////AA=="
+            : json["commentInfo"]["file1"]
         } //将来的にはこのコメントに付属された画像を表示する。
         alt="Paella dish"
       />

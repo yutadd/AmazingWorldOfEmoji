@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CommentDetail {
-	Comment c;
+	Comment commentInfo;
 	private String username;
+	private String liked;
 }

@@ -9,8 +9,11 @@ import org.springframework.stereotype.Repository;
 
 import com.yutadd.model.entity.Emoji;
 import com.yutadd.model.entity.Like;
+import com.yutadd.model.entity.LikeKey;
 @Repository
-public interface LikeRepository extends JpaRepository<Like, String> {
+public interface LikeRepository extends JpaRepository<Like, LikeKey> {
 	@Query("select count(l) from Like l where l.commentID = ?1")
-	 public int countById(@Param("cid")String cid);
+	 public int countByCID(String cid);
+	@Query("select l from Like l where l.commentID= ?1")
+	public List<Like> findAllByCID(String cid);
 }

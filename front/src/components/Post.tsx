@@ -8,7 +8,7 @@ import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import CloseIcon from "@mui/icons-material/Close";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import SendIcon from "@mui/icons-material/Send";
-import { fileURLToPath } from "url";
+import Grid from "@mui/material/Grid";
 export default function Post(props: any) {
   function reducer(
     state: { index: number; file: File }[],
@@ -32,6 +32,10 @@ export default function Post(props: any) {
   const [images, setImages] = useReducer(reducer, initial); //これ絶対usereducerの方がいい
   return (
     <Modal
+      open={props.show}
+      onClose={() => props.setShow(false)}
+      aria-labelledby=""
+      aria-describedby="modal-modal-description"
       onDrop={(event) => {
         console.log("drop");
         console.log(event.dataTransfer.items);
@@ -42,51 +46,66 @@ export default function Post(props: any) {
         console.log(event.dataTransfer.items);
         event.preventDefault();
       }}
-      open={props.show}
-      style={{ display: "inline" }}
-      onClose={() => props.setShow(false)}
-      aria-labelledby=""
-      aria-describedby="modal-modal-description"
     >
-      <Card style={{ textAlign: "left" }} sx={{ p: "50px" }}>
+      <Card
+        style={{
+          borderRadius: "16px",
+          outline: "none",
+          textAlign: "left",
+          display: "inline-block",
+        }}
+        sx={{ mt: "4.5vh", ml: "30vw", p: "30px" }}
+      >
         <CloseIcon
-          sx={{ pl: "71vw" }}
+          color="secondary"
+          onClick={() => props.setShow(false)}
+          sx={{
+            pl: "40vw",
+          }}
           style={{
             textAlign: "right",
             fontSize: "42px",
             position: "absolute",
           }}
         />
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", display: "inline" }}>
           <div
-            placeholder="text here..."
-            role="textbox"
-            color={grey[500]}
-            contentEditable="true"
-            spellCheck="true"
             style={{
-              overflowY: "scroll",
-              fontSize: "25px",
-              marginLeft: "30vw",
-              paddingTop: "10px",
-              fontFamily: "メイリオ",
-              resize: "none",
+              overflow: "hidden",
               width: "40vw",
+              paddingTop: "10px",
+              /*marginLeft: "30vw",*/
+              border: "2px solid gray",
               borderRadius: "16px",
-              border:"2px solid gray",
-              height: "160px",
+              display: "inline-block",
             }}
-          />
-
-          <SendIcon color="action" style={{ fontSize: "80px" }} />
+          >
+            <div
+              placeholder="text here..."
+              role="textbox"
+              color={grey[500]}
+              contentEditable="true"
+              spellCheck="true"
+              style={{
+                padding: "5px",
+                overflowY: "scroll",
+                fontSize: "25px",
+                fontFamily: "メイリオ",
+                resize: "none",
+                outline: "none",
+                height: "160px",
+              }}
+            />
+          </div>
+          <SendIcon color="secondary" style={{ fontSize: "80px" }} />
           <br />
           <InsertPhotoIcon
-            color="action"
+            color="secondary"
             sx={{ mr: "20px" }}
-            style={{ fontSize: "80px", marginLeft: "30vw" }}
+            style={{ fontSize: "80px" }}
           />
           <AddReactionIcon
-            color="action"
+            color="secondary"
             sx={{ mr: "20px" }}
             style={{ fontSize: "80px" }}
           />

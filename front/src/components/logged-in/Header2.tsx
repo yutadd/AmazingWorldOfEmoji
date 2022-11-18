@@ -14,7 +14,6 @@ import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import "../Header.css";
 import { Context } from "../App";
-import Modal from "@mui/material/Modal";
 
 import { Autocomplete } from "@mui/material";
 
@@ -40,7 +39,7 @@ export default function Header2() {
     spl.map((e) => {
       ret.push(
         <React.Fragment key={e}>
-          {e}
+          {e.replace(" ", "　")}
           <br />
         </React.Fragment>
       );
@@ -94,18 +93,24 @@ export default function Header2() {
     <>
       <Toolbar sx={{ height: "6vh", borderBottom: 1, borderColor: "divider" }}>
         <Autocomplete
-          id="first"
+          color="secondary"
           style={{ width: "17vw" }}
-          value={text}
           options={assist}
           renderInput={(params) => (
-            //下            params
-            <TextField {...params} label="emoji searcher" variant="standard" />
+            <TextField
+              {...params}
+              color="secondary"
+              label="search"
+              autoComplete="off"
+              placeholder="userid.title"
+              variant="standard"
+            />
           )}
           renderOption={(props, option: string) => {
             return (
               <li {...props} style={{ borderBottom: "1px solid grey" }}>
                 <div
+                  style={{ color: "#9C27B0" }}
                   onClick={() => {
                     showResultRight(option);
                   }}
@@ -136,17 +141,19 @@ export default function Header2() {
           }}
         />
         <IconButton
+          color="secondary"
           onClick={() => {
             console.log("");
           }}
         >
-          <SearchIcon>search</SearchIcon>
+          <SearchIcon color="secondary"></SearchIcon>
         </IconButton>
         <Typography
           className="title"
           component="h2"
           variant="h5"
-          color="inherit"
+          fontWeight={600}
+          color="secondary"
           align="center"
           noWrap
           fontSize={"2vw"}
@@ -155,7 +162,9 @@ export default function Header2() {
           TheAmazingWorldOfEmoji
         </Typography>
         <img style={{ marginLeft: "auto" }} src="icon.png" height={30} />
-        <Button sx={{ ml: "auto" }}>{displayId}</Button>
+        <Button color="secondary" sx={{ ml: "auto" }}>
+          {displayId}
+        </Button>
       </Toolbar>
     </>
   ); // TODO:ユーザーの名前のボタンを押したら右画面にユーザーの情報が表示されるようにする。
