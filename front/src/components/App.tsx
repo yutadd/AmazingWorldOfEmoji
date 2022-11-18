@@ -102,7 +102,7 @@ function App() {
         <Grid style={{ textAlign: "left" }} sx={{ px: "1vw" }}>
           <TextField
             sx={{ pt: "1vh", pb: "1vh", width: "100%" }}
-            autoComplete="id"
+            autoComplete="username"
             type={"text"}
             placeholder="ID"
             onChange={(e) => {
@@ -150,6 +150,7 @@ function App() {
             value={inputSignID}
             type={"text"}
             id={"name"}
+            autoComplete="username"
             placeholder="userID"
             onChange={(e) => {
               setSignInputID(e.target.value);
@@ -160,6 +161,7 @@ function App() {
             sx={{ pb: "1vh", width: "100%" }}
             value={inputSignPass}
             placeholder="password"
+            autoComplete="password"
             type={"password"}
             id={"password"}
             onChange={(e) => {
@@ -171,6 +173,7 @@ function App() {
             sx={{ pb: "1vh", width: "100%" }}
             value={inputSignName}
             placeholder="display name"
+            autoComplete="name"
             type={"text"}
             id={"nickname"}
             onChange={(e) => {
@@ -182,6 +185,7 @@ function App() {
             sx={{ pb: "1vh", width: "100%" }}
             value={inputSignEmail}
             placeholder="email"
+            autoComplete="email"
             type={"email"}
             id={"email"}
             onChange={(e) => {
@@ -191,6 +195,7 @@ function App() {
           <br />
           <TextField
             sx={{ pb: "1vh", width: "100%" }}
+            autoComplete="birthday"
             value={inputSignBirth}
             placeholder="birth"
             type={"date"}
