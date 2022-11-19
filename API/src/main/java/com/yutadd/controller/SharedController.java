@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -23,8 +24,10 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,6 +53,8 @@ import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionIDRepository;
 import com.yutadd.repository.UserRepository;
 
+import ch.qos.logback.core.encoder.ByteArrayUtil;
+
 @Controller
 @RequestMapping(value="/api/share/")
 public class SharedController extends ResponseEntityExceptionHandler {
@@ -65,19 +70,33 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	private CommentRepository crepository;
 	@Autowired
 	private LikeRepository lrepository;
-	@RequestMapping(value="/post/message", method=RequestMethod.POST)
-	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files")String files,HttpSession session) {
-		String[] fileargs=files.split(";");
-		if(fileargs.length==4) {
+
+	@PostMapping(value="/post/message")
+	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files") MultipartFile[] files,HttpSession session) {
+		if(files.length<5) {
+			List<String> fileList=new ArrayList<String>();
 			boolean filecheck=true;
-			for (String string : fileargs) {
-				if(!string.matches("^[0-9a-fA-F]*")&&!string.equals("none")) {
+			int i=0;
+			for (MultipartFile file : files) {
+				if(!file.getContentType().split("/")[0].equals("image")) {
 					filecheck=false;
+					break;
+				}else {
+					String fName="user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator+(System.currentTimeMillis()+i++)+"."+file.getContentType().split("/")[1];
+					fileList.add(fName);
+					try {
+						File f=new File(fName);
+						FileOutputStream fos=new FileOutputStream(f);
+						fos.write(file.getBytes());
+						fos.flush();
+						fos.close();
+					}catch(Exception e) {e.printStackTrace();}
 				}
 			}
 			if(filecheck) {
 				message=message.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("&", "&amp;");
 				if(srepository.existsById(session.getId())) {
+					long timestamp=(System.currentTimeMillis());
 					String uid=srepository.findById(session.getId()).get().getUserID();
 					Random rn = new Random();
 					BigInteger cID= new BigInteger(255,rn);
@@ -85,10 +104,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 					c.setUserID(uid);
 					c.setCommentID(cID.toString(16));
 					c.setText(message);
-					c.setFile1(fileargs[0]);
-					c.setFile2(fileargs[1]);
-					c.setFile3(fileargs[2]);
-					c.setFile4(fileargs[3]);
+					c.setFiles(new Gson().toJson(fileList));
 					c.setTime(Date.valueOf(LocalDate.now()));
 					crepository.save(c);
 					return ResponseEntity.status(HttpStatus.OK).body("OK");
@@ -101,6 +117,23 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		}else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILE_AMOUNT");
 		}
+	}
+	@RequestMapping(value="/get/image")
+	@ResponseBody
+	public ResponseEntity<byte[]> getImage(@RequestParam("uid")String uid,@RequestParam("imageName")String name){
+		try{
+			if(name.matches("^[0-9]*$")) {
+				if(uid.matches("^[0-9a-zA-Z]*$")) {
+					InputStream is=new FileInputStream(new File(uid));
+					byte[] ret=IOUtils.toByteArray(is);
+					is.close();
+					return ResponseEntity.status(HttpStatus.OK).body(ret);
+				}
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return ResponseEntity.status(HttpStatus.OK).body("404".getBytes());
 	}
 	@RequestMapping(value="/post/like",method=RequestMethod.POST)
 	@ResponseBody
@@ -144,9 +177,9 @@ public class SharedController extends ResponseEntityExceptionHandler {
 							cd.setLiked("false");
 						}
 					}
-					}else {
-						cd.setLiked("false");
-					}
+				}else {
+					cd.setLiked("false");
+				}
 				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
 				cd.setCommentInfo(c);
 				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
@@ -182,14 +215,14 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			tmpCd.setCommentInfo(cobj);
 			List<Like>likes=lrepository.findAllByCID(c);
 			if(!likes.isEmpty()) {
-			for(Like l:likes) {
-				if(l.getUserID().equals(id)) {
-					tmpCd.setLiked("true");
-					break;
-				}else {
-					tmpCd.setLiked("false");
+				for(Like l:likes) {
+					if(l.getUserID().equals(id)) {
+						tmpCd.setLiked("true");
+						break;
+					}else {
+						tmpCd.setLiked("false");
+					}
 				}
-			}
 			}else {
 				tmpCd.setLiked("false");
 			}
@@ -207,7 +240,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		try {
 			String[] str1=emojiPath.split(Pattern.quote("."));
 			if(str1.length==2) {
-				File imageFile=new File("user"+File.separator+str1[0]+File.separator+str1[1]+"."+type);
+				File imageFile=new File("user"+File.separator+str1[0]+File.separator+"emoji"+File.separator+str1[1]+"."+type);
 				if(imageFile.exists()) {
 					FileInputStream fis=new FileInputStream(imageFile);
 					return ResponseEntity.status(HttpStatus.OK).body(IOUtils.toByteArray(fis));
@@ -285,7 +318,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				if(contentType.equals("image")) {
 					try {
 						Path path=Paths.get(replacesuid);
-						File file=new File("user"+File.separator+replacesuid+File.separator+title+"."+fileType);
+						File file=new File("user"+File.separator+replacesuid+File.separator+"emoji"+File.separator+title+"."+fileType);
 						Files.createDirectories(path);
 						//f.createNewFile();
 						OutputStream output=new FileOutputStream(file);

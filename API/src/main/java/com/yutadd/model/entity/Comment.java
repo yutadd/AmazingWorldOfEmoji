@@ -24,13 +24,7 @@ public class Comment implements Comparable<Comment>{
 	@Column(unique=true)
 	private String commentID;
 	@NotBlank
-	private String file1;
-	@NotBlank
-	private String file2;
-	@NotBlank
-	private String file3;
-	@NotBlank
-	private String file4;
+	private String files;
 	@NotBlank
 	private String text;
 	private Date time;
