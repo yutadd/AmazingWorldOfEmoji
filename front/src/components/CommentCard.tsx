@@ -9,6 +9,7 @@ import ShowDetailRight from "./ShowDetailRight";
 import { Context } from "./App";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import ImageComponent from "./ImageComponent";
 export default function CommentCard(property: any) {
   let name = property.user;
   console.log("commentcard : " + property.user);
@@ -64,7 +65,7 @@ export default function CommentCard(property: any) {
   return (
     <Paper
       key={json["commentInfo"]["commentID"]}
-      style={{ display: showMe ? "block" : "none" }}
+      style={{ display: showMe ? "block" : "none", maxHeight: "50vh" }}
       sx={{
         mt: "0.8vh", //margin-y 8px
         mx: 1, //margin-x
@@ -97,7 +98,7 @@ export default function CommentCard(property: any) {
             {likes}
           </Typography>
         </Grid>
-        <Grid width={"auto"} sx={{ my: "0", mx: "1vw" }}>
+        <Grid width={"100%"} sx={{ my: "0", mx: "1vw" }}>
           <p className="name">{name}</p>
           <p className="user-id">{json["commentInfo"]["userID"]}</p>
           <Typography
@@ -111,6 +112,17 @@ export default function CommentCard(property: any) {
           >
             {json["commentInfo"]["text"]}
           </Typography>
+          <Grid
+            style={{
+              maxWidth: "100%",
+              maxHeight: "60%",
+              textAlign: "center",
+            }}
+          >
+            {json["files"]["file1"] !== undefined && (
+              <ImageComponent json={json} />
+            )}
+          </Grid>
         </Grid>
       </Grid>
     </Paper>

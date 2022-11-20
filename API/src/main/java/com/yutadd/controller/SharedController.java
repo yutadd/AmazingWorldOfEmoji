@@ -39,15 +39,18 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.google.gson.Gson;
 import com.yutadd.model.CommentDetail;
 import com.yutadd.model.EmojiDetail;
+import com.yutadd.model.FileDetail;
 import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.Emoji;
+import com.yutadd.model.entity.FileContainer;
 import com.yutadd.model.entity.History;
 import com.yutadd.model.entity.Like;
 import com.yutadd.model.entity.SessionID;
 import com.yutadd.model.entity.User;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
+import com.yutadd.repository.FileContainerRepository;
 import com.yutadd.repository.HistoryRepository;
 import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionIDRepository;
@@ -62,6 +65,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	private EmojiRepository erepository;
 	@Autowired
 	private UserRepository urepository;
+	@Autowired
+	private FileContainerRepository frepository;
 	@Autowired
 	private SessionIDRepository srepository;
 	@Autowired
@@ -97,27 +102,35 @@ public class SharedController extends ResponseEntityExceptionHandler {
 					Random rn = new Random();
 					BigInteger cID= new BigInteger(255,rn);
 					Comment c=new Comment();
-					List<String> fileNameList=new ArrayList<String>();
+					FileContainer fc=new FileContainer();
+					fc.setCommentID(cID.toString(16));
 					try {
 						int i=0;
 						for (MultipartFile file : files) {
 							if(!file.isEmpty()) {
-								String directory="."+File.separator+"user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator;
-								String fName=(System.currentTimeMillis()+i++)+"."+file.getContentType().split("/")[1];
+								String directory="user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator;
+
+								String fName=(System.currentTimeMillis()+i)+"."+file.getContentType().split("/")[1];
 								Files.createDirectories(Paths.get(directory));
+								switch(i) {
+								case 0:fc.setFile1(fName);break;
+								case 1:fc.setFile2(fName);break;
+								case 2:fc.setFile3(fName);break;
+								case 3:fc.setFile4(fName);break;
+								}
 								File f=new File(directory+fName);
-								fileNameList.add(directory+fName);
 								FileOutputStream fos=new FileOutputStream(f);
 								fos.write(file.getBytes());
 								fos.flush();
 								fos.close();
+								i++;
 							}
 						}
 					}catch(Exception e) {e.printStackTrace();return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("faild to create file or directory");}
 					c.setUserID(uid);
 					c.setCommentID(cID.toString(16));
 					c.setText(message);
-					c.setFiles(new Gson().toJson(fileNameList));
+					frepository.save(fc);
 					c.setTime(Date.valueOf(LocalDate.now()));
 					crepository.save(c);
 					return ResponseEntity.status(HttpStatus.OK).body("OK");
@@ -137,9 +150,9 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<byte[]> getImage(@RequestParam("uid") String uid, @RequestParam("imageName") String name) {
 		try {
-			if (name.matches("^[0-9]*$")) {
+			if (name.matches("^[0-9]*\\.[a-zA-Z]*$")) {
 				if (uid.matches("^[0-9a-zA-Z]*$")) {
-					InputStream is = new FileInputStream(new File(uid));
+					InputStream is = new FileInputStream(new File("user"+File.separator+uid+File.separator+"img"+File.separator+name));
 					byte[] ret = IOUtils.toByteArray(is);
 					is.close();
 					return ResponseEntity.status(HttpStatus.OK).body(ret);
@@ -197,6 +210,25 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				} else {
 					cd.setLiked("false");
 				}
+				FileContainer fc=frepository.findById(cid).get();
+				FileDetail files=new FileDetail();
+				for(int i=1;i<5;i++) {
+					switch(i) {
+					case 1:if(fc.getFile1()!=null) {
+						files.setFile1(fc.getFile1());
+					}break;
+					case 2:if(fc.getFile2()!=null) {
+						files.setFile2(fc.getFile2());
+					}break;
+					case 3:if(fc.getFile3()!=null) {
+						files.setFile3(fc.getFile3());
+					}break;
+					case 4:if(fc.getFile4()!=null) {
+						files.setFile4(fc.getFile4());
+					}break;
+					}
+				}
+				cd.setFiles(files);
 				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
 				cd.setCommentInfo(c);
 				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
@@ -244,6 +276,25 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			} else {
 				tmpCd.setLiked("false");
 			}
+			FileContainer fc=frepository.findById(c).get();
+			FileDetail files=new FileDetail();
+			for(int i=1;i<5;i++) {
+				switch(i) {
+				case 1:if(fc.getFile1()!=null) {
+					files.setFile1(fc.getFile1());
+				}break;
+				case 2:if(fc.getFile2()!=null) {
+					files.setFile2(fc.getFile2());
+				}break;
+				case 3:if(fc.getFile3()!=null) {
+					files.setFile3(fc.getFile3());
+				}break;
+				case 4:if(fc.getFile4()!=null) {
+					files.setFile4(fc.getFile4());
+				}break;
+				}
+			}
+			tmpCd.setFiles(files);
 			tmpCd.setUsername(urepository.findById(cobj.getUserID()).get().getName());
 			cd.add(tmpCd);
 		}

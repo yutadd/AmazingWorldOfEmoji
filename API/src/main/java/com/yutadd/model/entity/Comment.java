@@ -24,8 +24,6 @@ public class Comment implements Comparable<Comment>{
 	@Column(unique=true)
 	private String commentID;
 	@NotBlank
-	private String files;
-	@NotBlank
 	private String text;
 	private Date time;
 	private long likes;
