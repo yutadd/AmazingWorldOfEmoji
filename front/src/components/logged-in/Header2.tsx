@@ -93,6 +93,7 @@ export default function Header2() {
     <>
       <Toolbar sx={{ height: "6vh", borderBottom: 1, borderColor: "divider" }}>
         <Autocomplete
+          autoComplete={false}
           color="secondary"
           style={{ width: "17vw" }}
           options={assist}
@@ -101,7 +102,7 @@ export default function Header2() {
               {...params}
               color="secondary"
               label="search"
-              autoComplete="off"
+              autoComplete="new-password"
               placeholder="userid.title"
               variant="standard"
             />

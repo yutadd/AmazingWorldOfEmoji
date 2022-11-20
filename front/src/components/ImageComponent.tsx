@@ -47,6 +47,7 @@ export default function (props: any) {
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
+              overflow: "hidden",
             }}
             src={
               "/api/share/get/image?uid=" +
@@ -63,10 +64,12 @@ export default function (props: any) {
     <>
       <Grid
         style={{
-          marginTop: "1vh",
-          maxHeight: "100%",
-          maxWidth: "100%",
+          marginLeft: "auto",
+          marginRight: "auto",
+          maxHeight: "50%",
+          maxWidth: "50%",
           overflow: "hidden",
+          textAlign: "center",
         }}
       >
         {length > 0 && <ImageComponent link={json["files"]["file1"]} />}

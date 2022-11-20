@@ -43,6 +43,35 @@ export default function ShowDetailRight(values: any) {
       update();
     }, 5000);
   }, []);
+  function ImageComponent(pro: any) {
+    return (
+      <>
+        <Grid
+          style={{
+            width: "50%",
+            height: "50%",
+            display: "inline-block",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+              overflow: "hidden",
+            }}
+            src={
+              "/api/share/get/image?uid=" +
+              json["commentInfo"]["userID"] +
+              "&imageName=" +
+              pro.link
+            }
+          />
+        </Grid>
+      </>
+    );
+  }
   return (
     <Card sx={{ mt: "1vh" }}>
       <CardHeader
@@ -58,16 +87,20 @@ export default function ShowDetailRight(values: any) {
           </Typography>
         </Grid>
       </CardContent>
-      <CardMedia
-        component="img"
-        height="194"
-        image={
-          json["commentInfo"]["file1"] === "none"
-            ? "data:image/bmp;base64,Qk06AAAAAAAAADYAAAAoAAAAAQAAAAEAAAABABgAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAA////AA=="
-            : json["commentInfo"]["file1"]
-        } //将来的にはこのコメントに付属された画像を表示する。
-        alt="Paella dish"
-      />
+      <Grid>
+        {json["files"]["file1"] !== undefined && (
+          <ImageComponent link={json["files"]["file1"]} />
+        )}
+        {json["files"]["file2"] !== undefined && (
+          <ImageComponent link={json["files"]["file2"]} />
+        )}
+        {json["files"]["file3"] !== undefined && (
+          <ImageComponent link={json["files"]["file3"]} />
+        )}
+        {json["files"]["file4"] !== undefined && (
+          <ImageComponent link={json["files"]["file4"]} />
+        )}
+      </Grid>
       <CardActions disableSpacing></CardActions>
     </Card>
   );

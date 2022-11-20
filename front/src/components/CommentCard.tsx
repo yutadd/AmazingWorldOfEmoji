@@ -115,8 +115,9 @@ export default function CommentCard(property: any) {
           <Grid
             style={{
               maxWidth: "100%",
-              maxHeight: "60%",
+              maxHeight: "50vh",
               textAlign: "center",
+              marginTop: "1vh",
             }}
           >
             {json["files"]["file1"] !== undefined && (
