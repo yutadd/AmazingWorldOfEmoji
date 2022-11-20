@@ -39,7 +39,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.google.gson.Gson;
 import com.yutadd.model.CommentDetail;
 import com.yutadd.model.EmojiDetail;
-import com.yutadd.model.HistoryRepository;
 import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.Emoji;
@@ -49,6 +48,7 @@ import com.yutadd.model.entity.SessionID;
 import com.yutadd.model.entity.User;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
+import com.yutadd.repository.HistoryRepository;
 import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionIDRepository;
 import com.yutadd.repository.UserRepository;
@@ -56,7 +56,7 @@ import com.yutadd.repository.UserRepository;
 import ch.qos.logback.core.encoder.ByteArrayUtil;
 
 @Controller
-@RequestMapping(value="/api/share/")
+@RequestMapping(value = "/api/share/")
 public class SharedController extends ResponseEntityExceptionHandler {
 	@Autowired
 	private EmojiRepository erepository;
@@ -73,157 +73,175 @@ public class SharedController extends ResponseEntityExceptionHandler {
 
 	@PostMapping(value="/post/message")
 	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files") MultipartFile[] files,HttpSession session) {
-		if(files.length<5) {
-			List<String> fileList=new ArrayList<String>();
-			boolean filecheck=true;
-			int i=0;
-			for (MultipartFile file : files) {
-				if(!file.getContentType().split("/")[0].equals("image")) {
-					filecheck=false;
-					break;
-				}else {
-					String fName="user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator+(System.currentTimeMillis()+i++)+"."+file.getContentType().split("/")[1];
-					fileList.add(fName);
-					try {
-						File f=new File(fName);
-						FileOutputStream fos=new FileOutputStream(f);
-						fos.write(file.getBytes());
-						fos.flush();
-						fos.close();
-					}catch(Exception e) {e.printStackTrace();}
+		if(srepository.existsById(session.getId())) {
+			if(files.length<5) {
+				List<String> List=new ArrayList<String>();
+				List<String> directoryList=new ArrayList<String>();
+				boolean filecheck=true;
+
+				System.out.println(files);
+				for (MultipartFile file : files) {
+					if(!file.isEmpty()) {
+						if(!file.getContentType().split("/")[0].equals("image")) {
+							filecheck=false;
+							break;
+						}
+					}else {
+						break;
+					}
 				}
-			}
-			if(filecheck) {
-				message=message.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("&", "&amp;");
-				if(srepository.existsById(session.getId())) {
+				if(filecheck) {
+					message=message.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("&", "&amp;");
 					long timestamp=(System.currentTimeMillis());
 					String uid=srepository.findById(session.getId()).get().getUserID();
 					Random rn = new Random();
 					BigInteger cID= new BigInteger(255,rn);
 					Comment c=new Comment();
+					List<String> fileNameList=new ArrayList<String>();
+					try {
+						int i=0;
+						for (MultipartFile file : files) {
+							if(!file.isEmpty()) {
+								String directory="."+File.separator+"user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator;
+								String fName=(System.currentTimeMillis()+i++)+"."+file.getContentType().split("/")[1];
+								Files.createDirectories(Paths.get(directory));
+								File f=new File(directory+fName);
+								fileNameList.add(directory+fName);
+								FileOutputStream fos=new FileOutputStream(f);
+								fos.write(file.getBytes());
+								fos.flush();
+								fos.close();
+							}
+						}
+					}catch(Exception e) {e.printStackTrace();return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("faild to create file or directory");}
 					c.setUserID(uid);
 					c.setCommentID(cID.toString(16));
 					c.setText(message);
-					c.setFiles(new Gson().toJson(fileList));
+					c.setFiles(new Gson().toJson(fileNameList));
 					c.setTime(Date.valueOf(LocalDate.now()));
 					crepository.save(c);
 					return ResponseEntity.status(HttpStatus.OK).body("OK");
+
 				}else {
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILEID");
 				}
 			}else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILEID");
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILE_AMOUNT");
 			}
 		}else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILE_AMOUNT");
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
 		}
 	}
-	@RequestMapping(value="/get/image")
+
+	@RequestMapping(value = "/get/image")
 	@ResponseBody
-	public ResponseEntity<byte[]> getImage(@RequestParam("uid")String uid,@RequestParam("imageName")String name){
-		try{
-			if(name.matches("^[0-9]*$")) {
-				if(uid.matches("^[0-9a-zA-Z]*$")) {
-					InputStream is=new FileInputStream(new File(uid));
-					byte[] ret=IOUtils.toByteArray(is);
+	public ResponseEntity<byte[]> getImage(@RequestParam("uid") String uid, @RequestParam("imageName") String name) {
+		try {
+			if (name.matches("^[0-9]*$")) {
+				if (uid.matches("^[0-9a-zA-Z]*$")) {
+					InputStream is = new FileInputStream(new File(uid));
+					byte[] ret = IOUtils.toByteArray(is);
 					is.close();
 					return ResponseEntity.status(HttpStatus.OK).body(ret);
 				}
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return ResponseEntity.status(HttpStatus.OK).body("404".getBytes());
 	}
-	@RequestMapping(value="/post/like",method=RequestMethod.POST)
+
+	@RequestMapping(value = "/post/like", method = RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<String>  getNewPosts(HttpSession session,@RequestParam("cid")String cid) {
-		if(crepository.existsById(cid)) {
-			Like l=new Like();
+	public ResponseEntity<String> getNewPosts(HttpSession session, @RequestParam("cid") String cid) {
+		if (crepository.existsById(cid)) {
+			Like l = new Like();
 			l.setCommentID(cid);
-			if(srepository.existsById(session.getId())) {
+			if (srepository.existsById(session.getId())) {
 				l.setUserID(srepository.findById(session.getId()).get().getUserID());
-				Comment c=crepository.findById(cid).get();
-				c.setLikes((c.getLikes()+1));
+				Comment c = crepository.findById(cid).get();
+				c.setLikes((c.getLikes() + 1));
 				crepository.save(c);
 				lrepository.save(l);
 				return ResponseEntity.status(HttpStatus.OK).body("OK");
-			}else {
+			} else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
 			}
-		}else {
+		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
 		}
 	}
-	@RequestMapping(value="/get/comment")
+
+	@RequestMapping(value = "/get/comment")
 	@ResponseBody
-	public ResponseEntity<String> getComment(HttpSession session,@RequestParam("cid")String cid) {
+	public ResponseEntity<String> getComment(HttpSession session, @RequestParam("cid") String cid) {
 		Comment c;
-		String uid="";
-		if(srepository.existsById(session.getId())) {
-			uid=srepository.findById(session.getId()).get().getUserID();
+		String uid = "";
+		if (srepository.existsById(session.getId())) {
+			uid = srepository.findById(session.getId()).get().getUserID();
 		}
-		CommentDetail cd=new CommentDetail();
-		if(crepository.existsById(cid)) {
-			c=crepository.findById(cid).get();
-			if(urepository.existsById(c.getUserID())) {
-				List<Like>likes=lrepository.findAllByCID(cid);
-				if(!uid.equals("")&&!likes.isEmpty()) {
-					for(Like l:likes) {
-						if(l.getUserID().equals(uid)) {
+		CommentDetail cd = new CommentDetail();
+		if (crepository.existsById(cid)) {
+			c = crepository.findById(cid).get();
+			if (urepository.existsById(c.getUserID())) {
+				List<Like> likes = lrepository.findAllByCID(cid);
+				if (!uid.equals("") && !likes.isEmpty()) {
+					for (Like l : likes) {
+						if (l.getUserID().equals(uid)) {
 							cd.setLiked("true");
 							break;
-						}else {
+						} else {
 							cd.setLiked("false");
 						}
 					}
-				}else {
+				} else {
 					cd.setLiked("false");
 				}
 				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
 				cd.setCommentInfo(c);
 				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
-			}else {
+			} else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
 			}
-		}else {
+		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
 		}
 	}
-	@RequestMapping(value="/get/comments",method=RequestMethod.GET)
+
+	@RequestMapping(value = "/get/comments", method = RequestMethod.GET)
 	@ResponseBody
 	public String getNewComments(HttpSession session) {
 		String id;
-		if(srepository.existsById(session.getId())) {
-			SessionID s=srepository.findById(session.getId()).get();
-			id=s.getUserID();
-		}else {
-			id=session.getId();
+		if (srepository.existsById(session.getId())) {
+			SessionID s = srepository.findById(session.getId()).get();
+			id = s.getUserID();
+		} else {
+			id = session.getId();
 		}
-		List<Comment> ret=new ArrayList<Comment>();
-		List<String> newComments=crepository.findNewComment(id,Date.valueOf(LocalDate.now().minusDays(1)));
-		List<CommentDetail> cd=new ArrayList<CommentDetail>();
-		for(String c:newComments) {
-			Comment cobj=crepository.findById(c).get();
-			History h=new History();
+		List<Comment> ret = new ArrayList<Comment>();
+		List<String> newComments = crepository.findNewComment(id, Date.valueOf(LocalDate.now().minusDays(1)));
+		List<CommentDetail> cd = new ArrayList<CommentDetail>();
+		for (String c : newComments) {
+			Comment cobj = crepository.findById(c).get();
+			History h = new History();
 			h.setCid(c);
 			h.setUid(id);
 			h.setDate(new Time(System.currentTimeMillis()));
 			ret.add(cobj);
 			hrepository.save(h);
-			CommentDetail tmpCd=new CommentDetail();
+			CommentDetail tmpCd = new CommentDetail();
 			tmpCd.setCommentInfo(cobj);
-			List<Like>likes=lrepository.findAllByCID(c);
-			if(!likes.isEmpty()) {
-				for(Like l:likes) {
-					if(l.getUserID().equals(id)) {
+			List<Like> likes = lrepository.findAllByCID(c);
+			if (!likes.isEmpty()) {
+				for (Like l : likes) {
+					if (l.getUserID().equals(id)) {
 						tmpCd.setLiked("true");
 						break;
-					}else {
+					} else {
 						tmpCd.setLiked("false");
 					}
 				}
-			}else {
+			} else {
 				tmpCd.setLiked("false");
 			}
 			tmpCd.setUsername(urepository.findById(cobj.getUserID()).get().getName());
@@ -233,117 +251,128 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		String json = gson.toJson(cd);
 		return json;
 	}
+
 	/*yutadd.yeah*/
-	@RequestMapping(value="/get/emoji",method=RequestMethod.GET)
+	@RequestMapping(value = "/get/emoji", method = RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<byte[]> emojiImage(@RequestParam("emoji")String emojiPath,@RequestParam("type")String type) {
+	public ResponseEntity<byte[]> emojiImage(@RequestParam("emoji") String emojiPath,
+			@RequestParam("type") String type) {
 		try {
-			String[] str1=emojiPath.split(Pattern.quote("."));
-			if(str1.length==2) {
-				File imageFile=new File("user"+File.separator+str1[0]+File.separator+"emoji"+File.separator+str1[1]+"."+type);
-				if(imageFile.exists()) {
-					FileInputStream fis=new FileInputStream(imageFile);
+			String[] str1 = emojiPath.split(Pattern.quote("."));
+			if (str1.length == 2) {
+				File imageFile = new File("user" + File.separator + str1[0] + File.separator + "emoji" + File.separator
+						+ str1[1] + "." + type);
+				if (imageFile.exists()) {
+					FileInputStream fis = new FileInputStream(imageFile);
 					return ResponseEntity.status(HttpStatus.OK).body(IOUtils.toByteArray(fis));
-				}else {
+				} else {
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND".getBytes());
 				}
-			}else {
+			} else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_PATH_FORMAT".getBytes());
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("UNKNOWN_ERROR".getBytes());
 		}
 	}
+
 	/*
 	 * yutadd.yeah
 	 * 絵文字の検索はユーザーの検索とユーザーから絵文字を絞り込む検索をすれば取得できる。
 	 * */
-	@RequestMapping(value="/get/searchuser",method=RequestMethod.GET)
+	@RequestMapping(value = "/get/searchuser", method = RequestMethod.GET)
 	@ResponseBody
-	public String searchUser(@RequestParam("name")String name) {
-		List<String> users=urepository.findUsers(name+"%");
+	public String searchUser(@RequestParam("name") String name) {
+		List<String> users = urepository.findUsers(name + "%");
 		return new Gson().toJson(users);
 	}
-	@RequestMapping(value="/get/searchemoji",method=RequestMethod.GET)
+
+	@RequestMapping(value = "/get/searchemoji", method = RequestMethod.GET)
 	@ResponseBody
-	public String searchEmoji(@RequestParam("path")String path) {
-		List<String> emojis=erepository.findEmoji(path+"%");
+	public String searchEmoji(@RequestParam("path") String path) {
+		List<String> emojis = erepository.findEmoji(path + "%");
 		return new Gson().toJson(emojis);
 	}
-	@RequestMapping(value="/get/getEmojiDetail",method=RequestMethod.GET)
+
+	@RequestMapping(value = "/get/getEmojiDetail", method = RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<String> getEmojiDetail(@RequestParam("path")String path) {
-		if(erepository.existsById(path)) {
-			Emoji e=erepository.findById(path).get();
-			User u=urepository.findById(e.getUserID()).get();
-			EmojiDetail ud=new EmojiDetail();
+	public ResponseEntity<String> getEmojiDetail(@RequestParam("path") String path) {
+		if (erepository.existsById(path)) {
+			Emoji e = erepository.findById(path).get();
+			User u = urepository.findById(e.getUserID()).get();
+			EmojiDetail ud = new EmojiDetail();
 			ud.setUserName(u.getName());
 			ud.setUserID(u.getUserid());
 			ud.setPath(path);
 			ud.setTitle(e.getTitle());
 			ud.setType(e.getType());
 			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(ud));
-		}else {
+		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND");
 		}
 
 	}
-	@RequestMapping(value="/get/getuser",method=RequestMethod.GET)
+
+	@RequestMapping(value = "/get/getuser", method = RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<String> getUser(@RequestParam("uid")String uid) {
-		if(urepository.existsById(uid)) {
-			User user=urepository.findById(uid).get();
-			UserDetail ud=new UserDetail();
+	public ResponseEntity<String> getUser(@RequestParam("uid") String uid) {
+		if (urepository.existsById(uid)) {
+			User user = urepository.findById(uid).get();
+			UserDetail ud = new UserDetail();
 			ud.setName(user.getName());
 			ud.setUid(uid);
 			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(ud));
-		}else {
+		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND");
 		}
 	}
-	@RequestMapping(value="/get/likes")
-	public ResponseEntity<String> getLikes(@RequestParam("cid")String cid){
-		List<Like> likelist=lrepository.findAllByCID(cid);
+
+	@RequestMapping(value = "/get/likes")
+	public ResponseEntity<String> getLikes(@RequestParam("cid") String cid) {
+		List<Like> likelist = lrepository.findAllByCID(cid);
 		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(likelist));
 	}
-	@RequestMapping(value="/post/emoji", method=RequestMethod.POST)
-	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,@RequestParam("title") String title,HttpSession session) {
-		if(srepository.existsById(session.getId())) {
-			String uid=srepository.findById(session.getId()).get().getUserID();
-			String replacesuid=uid.replace("@","");
-			if(title.matches("[a-zA-Z]*")) {
-				String contentType=imageFile.getContentType().split("/")[0];
-				String fileType=imageFile.getContentType().split("/")[1];
-				if(contentType.equals("image")) {
+
+	@RequestMapping(value = "/post/emoji", method = RequestMethod.POST)
+	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,
+			@RequestParam("title") String title, HttpSession session) {
+		if (srepository.existsById(session.getId())) {
+			String uid = srepository.findById(session.getId()).get().getUserID();
+			String replacesuid = uid.replace("@", "");
+			if (title.matches("[a-zA-Z]*")) {
+				String contentType = imageFile.getContentType().split("/")[0];
+				String fileType = imageFile.getContentType().split("/")[1];
+				if (contentType.equals("image")) {
 					try {
-						Path path=Paths.get(replacesuid);
-						File file=new File("user"+File.separator+replacesuid+File.separator+"emoji"+File.separator+title+"."+fileType);
+						Path path = Paths.get(replacesuid);
+						File file = new File("user" + File.separator + replacesuid + File.separator + "emoji"
+								+ File.separator + title + "." + fileType);
 						Files.createDirectories(path);
 						//f.createNewFile();
-						OutputStream output=new FileOutputStream(file);
+						OutputStream output = new FileOutputStream(file);
 						output.write(imageFile.getBytes());
 						output.flush();
 						output.close();
-						Emoji emoji=new Emoji();
+						Emoji emoji = new Emoji();
 						emoji.setPopularity(0);
 						emoji.setType(fileType);
 						emoji.setTitle(title);
 						emoji.setUserID(uid);
-						emoji.setPath(replacesuid+"."+title);
+						emoji.setPath(replacesuid + "." + title);
 						erepository.save(emoji);
 						return new ResponseEntity<>(HttpStatus.OK);
 					} catch (IOException e) {
 						e.printStackTrace();
 						return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("UNKNOWN_ERROR");
 					}
-				}else {
+				} else {
 					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_CONTENT_TYPE");
 				}
-			}else {
+			} else {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_TITLE");
 			}
-		}else {
+		} else {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("INVALID_AUTH");
 		}
 	}
