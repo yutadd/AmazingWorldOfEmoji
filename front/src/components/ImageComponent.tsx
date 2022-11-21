@@ -1,15 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-import Avatar from "@mui/material/Avatar";
-import { orange, purple } from "@mui/material/colors";
-import ShowDetailRight from "./ShowDetailRight";
-import { Context } from "./App";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import { textAlign } from "@mui/system";
+
 export default function (props: any) {
   const json = props.json;
   const [length, setlength] = useState(0);

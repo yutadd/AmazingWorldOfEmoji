@@ -22,11 +22,11 @@ function Home() {
       const getter = async () => {
         const promise = await fetch("/api/share/get/comments");
         const json = await promise.json();
-        console.log(json.length);
+
         for (let a = 0; a < json.length; a++) {
           setCards((previous: JSX.Element[] | undefined) => {
             let tmp: JSX.Element[] = [...(previous as JSX.Element[])];
-            console.log(json[a]);
+
             tmp.push(
               <CommentCard
                 key={json[a]["commentInfo"]["commentID"]}
@@ -39,7 +39,7 @@ function Home() {
         }
       };
       getter();
-    }, 1000);
+    }, 3000);
   }, []);
 
   return (

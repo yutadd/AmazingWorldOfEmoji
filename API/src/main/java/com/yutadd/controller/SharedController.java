@@ -109,7 +109,6 @@ public class SharedController extends ResponseEntityExceptionHandler {
 						for (MultipartFile file : files) {
 							if(!file.isEmpty()) {
 								String directory="user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator;
-
 								String fName=(System.currentTimeMillis()+i)+"."+file.getContentType().split("/")[1];
 								Files.createDirectories(Paths.get(directory));
 								switch(i) {
@@ -396,10 +395,11 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				String fileType = imageFile.getContentType().split("/")[1];
 				if (contentType.equals("image")) {
 					try {
-						Path path = Paths.get(replacesuid);
-						File file = new File("user" + File.separator + replacesuid + File.separator + "emoji"
-								+ File.separator + title + "." + fileType);
-						Files.createDirectories(path);
+						String path="user" + File.separator + replacesuid + File.separator + "emoji"
+								+ File.separator;
+						
+						File file = new File(path+ title + "." + fileType);
+						Files.createDirectories(Paths.get(path));
 						//f.createNewFile();
 						OutputStream output = new FileOutputStream(file);
 						output.write(imageFile.getBytes());

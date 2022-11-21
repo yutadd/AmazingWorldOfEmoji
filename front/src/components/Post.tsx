@@ -26,6 +26,43 @@ export default function Post(props: any) {
       return state;
     }
   }
+  const analyze = async (originaltxt: string, index: number): Promise<any> => {
+    if (
+      originaltxt.charAt(index) === " " ||
+      originaltxt.charAt(index) === "&nbsp;"
+    ) {
+      if (originaltxt.charAt(index + 1) === ":") {
+        let name = "";
+        for (let f = index + 2; f < originaltxt.length; f++) {
+          if (originaltxt.charAt(f) === ":") {
+            const promise = await fetch(
+              "/api/share/get/getEmojiDetail?path=" + name
+            );
+            const emojijson = await promise.json();
+            console.log(name);
+            return (
+              '<img width="25"src="/api/share/get/emoji?emoji=' +
+              name +
+              "&type=" +
+              emojijson["type"] +
+              '" />' +
+              (f !== originaltxt.length - 1
+                ? await analyze(originaltxt, name.length + 2)
+                : "")
+            );
+          } else {
+            name = name + originaltxt.charAt(f);
+          }
+        }
+      }
+    }
+    return (
+      originaltxt.charAt(index) +
+      (index !== originaltxt.length - 1
+        ? await analyze(originaltxt, index + 1)
+        : "")
+    );
+  };
   const [text, setText] = useState("");
   const [displayText, setDisplayText] = useState(<></>);
   const initial: { index: number; file: File }[] = [];
@@ -83,6 +120,48 @@ export default function Post(props: any) {
             <div
               placeholder="text here..."
               role="textbox"
+              id="inputting"
+              onInput={(e) => {
+                const dou = async (current: EventTarget & HTMLDivElement) => {
+                  const cursor = document.getSelection()?.focusOffset as number; //入力後のカーソル位置
+                  const previousAnchorObj = document.getSelection()
+                    ?.anchorNode as Node; //inputElementから見た入力後カーソルがあるオブジェクト
+                  let previousIndex = 0;
+                  const parentObj =
+                    document.getSelection()?.focusNode?.parentNode;
+                  for (
+                    let i = 0;
+                    i <
+                    (parentObj?.childNodes.length
+                      ? parentObj?.childNodes.length
+                      : 0);
+                    i++
+                  ) {
+                    if (
+                      parentObj?.childNodes
+                        .item(i)
+                        .isEqualNode(previousAnchorObj)
+                    ) {
+                      previousIndex = i;
+                    }
+                  }
+                  current.innerHTML = await analyze(current.innerHTML, 0); //絵文字挿入を行う
+                  const currentAnchorNode = document.getSelection()?.anchorNode
+                    ?.childNodes[previousIndex] as Node;
+                  const range = document.createRange();
+                  range.setStart(currentAnchorNode, cursor);
+                  document.getSelection()?.removeAllRanges();
+                  document.getSelection()?.addRange(range);
+                  //const focusNode = document.getSelection()?.focusOffset as Node;
+                  //const range = document.createRange();
+                  // range.setStart(focusNode); //setstart(node,range index)
+                  //document.getSelection()?.removeAllRanges();
+                  //document.getSelection()?.addRange(range);
+                };
+                if (e.currentTarget.innerHTML !== "") {
+                  dou(e.currentTarget);
+                }
+              }}
               color={grey[500]}
               contentEditable="true"
               spellCheck="true"
@@ -95,7 +174,7 @@ export default function Post(props: any) {
                 outline: "none",
                 height: "160px",
               }}
-            />
+            ></div>
           </div>
           <SendIcon color="secondary" style={{ fontSize: "80px" }} />
           <br />
