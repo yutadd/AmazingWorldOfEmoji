@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import axios from "axios";
 import Modal from "@mui/material/Modal";
 import { grey } from "@mui/material/colors";
@@ -9,14 +9,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import SendIcon from "@mui/icons-material/Send";
 import Grid from "@mui/material/Grid";
+import { FormControlUnstyled } from "@mui/base";
+import { isEmptyBindingElement } from "typescript";
+/*予約された文字:§*/
 export default function Post(props: any) {
+  const [manuscript, setManuscript] = useState("");
+  const inputTextObj = useRef<HTMLDivElement>();
   function reducer(
     state: { index: number; file: File }[],
-    action: any
+    action: { index: number; action: string; file: File }
   ): { index: number; file: File }[] {
     if (action.action === "add") {
       const newarray = [...state];
-      newarray.push(action.index, action.file);
+      newarray.push({ index: action.index, file: action.file });
       return newarray;
     } else if (action.action === "remove") {
       const newarray = [...state];
@@ -26,33 +31,47 @@ export default function Post(props: any) {
       return state;
     }
   }
+  const post = (validatedText: string) => {
+    let form = new FormData();
+    for (let i = 0; i < images.length; i++) {
+      form.append("files", images[i]["file"]);
+    }
+    form.append("message", validatedText);
+    fetch("/api/share/post/message", { method: "POST", body: form });
+    alert("posted your perfect comment!");
+  };
+  const commentToOriginal = (originaltxt: string) => {
+    let replacetarget = originaltxt.replaceAll(
+      new RegExp("&amp;type=[a-zA-Z]*.>", "g"),
+      "§"
+    );
+    replacetarget = replacetarget.replaceAll(
+      new RegExp('<img width="25" src="/api/share/get/emoji.emoji=', "g"),
+      "§"
+    );
+    return replacetarget;
+  };
   const analyze = async (originaltxt: string, index: number): Promise<any> => {
-    if (
-      originaltxt.charAt(index) === " " ||
-      originaltxt.charAt(index) === "&nbsp;"
-    ) {
-      if (originaltxt.charAt(index + 1) === ":") {
-        let name = "";
-        for (let f = index + 2; f < originaltxt.length; f++) {
-          if (originaltxt.charAt(f) === ":") {
-            const promise = await fetch(
-              "/api/share/get/getEmojiDetail?path=" + name
-            );
-            const emojijson = await promise.json();
-            console.log(name);
-            return (
-              '<img width="25"src="/api/share/get/emoji?emoji=' +
-              name +
-              "&type=" +
-              emojijson["type"] +
-              '" />' +
-              (f !== originaltxt.length - 1
-                ? await analyze(originaltxt, name.length + 2)
-                : "")
-            );
-          } else {
-            name = name + originaltxt.charAt(f);
-          }
+    if (originaltxt.charAt(index) === ":") {
+      let name = "";
+      for (let f = index + 1; f < originaltxt.length; f++) {
+        if (originaltxt.charAt(f) === ":") {
+          const promise = await fetch(
+            "/api/share/get/getEmojiDetail?path=" + name
+          );
+          const emojijson = await promise.json();
+          return (
+            '<img width="25"src="/api/share/get/emoji?emoji=' +
+            name +
+            "&type=" +
+            emojijson["type"] +
+            '" />' +
+            (f !== originaltxt.length - 1
+              ? await analyze(originaltxt, name.length + 2)
+              : "")
+          );
+        } else {
+          name = name + originaltxt.charAt(f);
         }
       }
     }
@@ -63,10 +82,8 @@ export default function Post(props: any) {
         : "")
     );
   };
-  const [text, setText] = useState("");
-  const [displayText, setDisplayText] = useState(<></>);
   const initial: { index: number; file: File }[] = [];
-  const [images, setImages] = useReducer(reducer, initial); //これ絶対usereducerの方がいい
+  const [images, setImages] = useReducer(reducer, initial);
   return (
     <Modal
       open={props.show}
@@ -75,12 +92,25 @@ export default function Post(props: any) {
       aria-describedby="modal-modal-description"
       onDrop={(event) => {
         console.log("drop");
-        console.log(event.dataTransfer.items);
+        let allOkay = true;
+        for (let i = 0; i < event.dataTransfer.items.length; i++) {
+          if (event.dataTransfer.items[i].type.split("/")[0] !== "image") {
+            allOkay = false;
+          }
+        }
+        if (allOkay) {
+          for (let i = 0; i < event.dataTransfer.items.length; i++) {
+            setImages({
+              action: "add",
+              index: i,
+              file: event.dataTransfer.items[i].getAsFile() as File,
+            });
+          }
+        }
         event.preventDefault();
       }}
       onDragOver={(event) => {
-        console.log("dragOver");
-        console.log(event.dataTransfer.items);
+        //console.log(event.dataTransfer.items);
         event.preventDefault();
       }}
     >
@@ -146,21 +176,19 @@ export default function Post(props: any) {
                     }
                   }
                   current.innerHTML = await analyze(current.innerHTML, 0); //絵文字挿入を行う
+
                   const currentAnchorNode = document.getSelection()?.anchorNode
                     ?.childNodes[previousIndex] as Node;
                   const range = document.createRange();
                   range.setStart(currentAnchorNode, cursor);
                   document.getSelection()?.removeAllRanges();
                   document.getSelection()?.addRange(range);
-                  //const focusNode = document.getSelection()?.focusOffset as Node;
-                  //const range = document.createRange();
-                  // range.setStart(focusNode); //setstart(node,range index)
-                  //document.getSelection()?.removeAllRanges();
-                  //document.getSelection()?.addRange(range);
                 };
                 if (e.currentTarget.innerHTML !== "") {
                   dou(e.currentTarget);
+                  console.log(images);
                 }
+                inputTextObj.current = e.currentTarget;
               }}
               color={grey[500]}
               contentEditable="true"
@@ -176,7 +204,15 @@ export default function Post(props: any) {
               }}
             ></div>
           </div>
-          <SendIcon color="secondary" style={{ fontSize: "80px" }} />
+          <SendIcon
+            onClick={(e) => {
+              post(
+                commentToOriginal(inputTextObj.current?.innerHTML as string)
+              );
+            }}
+            color="secondary"
+            style={{ fontSize: "80px" }}
+          />
           <br />
           <InsertPhotoIcon
             color="secondary"
