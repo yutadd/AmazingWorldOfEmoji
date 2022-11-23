@@ -120,9 +120,7 @@ export default function CommentCard(property: any) {
               marginTop: "1vh",
             }}
           >
-            {json["files"]["file1"] !== undefined && (
-              <ImageComponent json={json} />
-            )}
+            <ImageComponent json={json} />
           </Grid>
         </Grid>
       </Grid>

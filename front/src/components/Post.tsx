@@ -11,6 +11,7 @@ import SendIcon from "@mui/icons-material/Send";
 import Grid from "@mui/material/Grid";
 import { FormControlUnstyled } from "@mui/base";
 import { isEmptyBindingElement } from "typescript";
+import { getByText } from "@testing-library/react";
 /*予約された文字:§*/
 export default function Post(props: any) {
   const [manuscript, setManuscript] = useState("");
@@ -33,16 +34,20 @@ export default function Post(props: any) {
     }
   }
   const post = (validatedText: string) => {
+    let files: File[] = [];
     let form = new FormData();
     for (let i = 0; i < images.length; i++) {
       form.append("files", images[i]["file"]);
-    }
-    if (images.length == 0) {
-      form.append("files", "空");
+      files.push(images[i]["file"]);
     }
     form.append("message", validatedText);
-    fetch("/api/share/post/message", { method: "POST", body: form });
-    alert("posted your perfect comment!");
+    if (images.length == 0) {
+      fetch("/api/share/post/message", { method: "POST", body: form });
+      alert("posted your perfect comment!");
+    } else {
+      fetch("/api/share/post/messagef", { method: "POST", body: form });
+      alert("posted imaged with your perfect comment!");
+    }
   };
   const commentToOriginal = (originaltxt: string) => {
     let replacetarget = originaltxt.replaceAll(

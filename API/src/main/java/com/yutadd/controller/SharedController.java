@@ -55,6 +55,7 @@ import com.yutadd.repository.HistoryRepository;
 import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionIDRepository;
 import com.yutadd.repository.UserRepository;
+import com.yutadd.service.postCommentService;
 
 import ch.qos.logback.core.encoder.ByteArrayUtil;
 
@@ -76,70 +77,20 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@Autowired
 	private LikeRepository lrepository;
 
-	@PostMapping(value="/post/message")
+	@PostMapping(value="/post/messagef")
 	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files") MultipartFile[] files,HttpSession session) {
 		if(srepository.existsById(session.getId())) {
-			if(files.length<5) {
-				List<String> List=new ArrayList<String>();
-				List<String> directoryList=new ArrayList<String>();
-				boolean filecheck=true;
-
-				System.out.println(files);
-				for (MultipartFile file : files) {
-					if(!file.isEmpty()) {
-						if(!file.getContentType().split("/")[0].equals("image")) {
-							filecheck=false;
-							break;
-						}
-					}else {
-						break;
-					}
-				}
-				if(filecheck) {
-					message=message.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\"", "&quot;").replaceAll("&", "&amp;");
-					long timestamp=(System.currentTimeMillis());
-					String uid=srepository.findById(session.getId()).get().getUserID();
-					Random rn = new Random();
-					BigInteger cID= new BigInteger(255,rn);
-					Comment c=new Comment();
-					FileContainer fc=new FileContainer();
-					fc.setCommentID(cID.toString(16));
-					try {
-						int i=0;
-						for (MultipartFile file : files) {
-							if(!file.isEmpty()) {
-								String directory="user"+File.separator+srepository.findById(session.getId()).get().getUserID()+File.separator+"img"+File.separator;
-								String fName=(System.currentTimeMillis()+i)+"."+file.getContentType().split("/")[1];
-								Files.createDirectories(Paths.get(directory));
-								switch(i) {
-								case 0:fc.setFile1(fName);break;
-								case 1:fc.setFile2(fName);break;
-								case 2:fc.setFile3(fName);break;
-								case 3:fc.setFile4(fName);break;
-								}
-								File f=new File(directory+fName);
-								FileOutputStream fos=new FileOutputStream(f);
-								fos.write(file.getBytes());
-								fos.flush();
-								fos.close();
-								i++;
-							}
-						}
-					}catch(Exception e) {e.printStackTrace();return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("faild to create file or directory");}
-					c.setUserID(uid);
-					c.setCommentID(cID.toString(16));
-					c.setText(message);
-					frepository.save(fc);
-					c.setTime(Date.valueOf(LocalDate.now()));
-					crepository.save(c);
-					return ResponseEntity.status(HttpStatus.OK).body("OK");
-
-				}else {
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILEID");
-				}
-			}else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILE_AMOUNT");
-			}
+			String uid=srepository.findById(session.getId()).get().getUserID();
+			return postCommentService.postCommentWithFile(message, files, uid, frepository, crepository);
+		}else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
+		}
+	}
+	@PostMapping(value="/post/message")
+	public ResponseEntity<String> addComment(@RequestParam("message")String message,HttpSession session) {
+		if(srepository.existsById(session.getId())) {
+			String uid=srepository.findById(session.getId()).get().getUserID();
+			return postCommentService.postComment(message, uid, crepository);
 		}else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
 		}
@@ -209,25 +160,27 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				} else {
 					cd.setLiked("false");
 				}
-				FileContainer fc=frepository.findById(cid).get();
-				FileDetail files=new FileDetail();
-				for(int i=1;i<5;i++) {
-					switch(i) {
-					case 1:if(fc.getFile1()!=null) {
-						files.setFile1(fc.getFile1());
-					}break;
-					case 2:if(fc.getFile2()!=null) {
-						files.setFile2(fc.getFile2());
-					}break;
-					case 3:if(fc.getFile3()!=null) {
-						files.setFile3(fc.getFile3());
-					}break;
-					case 4:if(fc.getFile4()!=null) {
-						files.setFile4(fc.getFile4());
-					}break;
+				if(frepository.existsById(cid)) {
+					FileContainer fc=frepository.findById(cid).get();
+					FileDetail files=new FileDetail();
+					for(int i=1;i<5;i++) {
+						switch(i) {
+						case 1:if(fc.getFile1()!=null) {
+							files.setFile1(fc.getFile1());
+						}break;
+						case 2:if(fc.getFile2()!=null) {
+							files.setFile2(fc.getFile2());
+						}break;
+						case 3:if(fc.getFile3()!=null) {
+							files.setFile3(fc.getFile3());
+						}break;
+						case 4:if(fc.getFile4()!=null) {
+							files.setFile4(fc.getFile4());
+						}break;
+						}
 					}
+					cd.setFiles(files);
 				}
-				cd.setFiles(files);
 				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
 				cd.setCommentInfo(c);
 				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
@@ -275,25 +228,27 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			} else {
 				tmpCd.setLiked("false");
 			}
-			FileContainer fc=frepository.findById(c).get();
-			FileDetail files=new FileDetail();
-			for(int i=1;i<5;i++) {
-				switch(i) {
-				case 1:if(fc.getFile1()!=null) {
-					files.setFile1(fc.getFile1());
-				}break;
-				case 2:if(fc.getFile2()!=null) {
-					files.setFile2(fc.getFile2());
-				}break;
-				case 3:if(fc.getFile3()!=null) {
-					files.setFile3(fc.getFile3());
-				}break;
-				case 4:if(fc.getFile4()!=null) {
-					files.setFile4(fc.getFile4());
-				}break;
+			if(frepository.existsById(c)) {
+				FileContainer fc=frepository.findById(c).get();
+				FileDetail files=new FileDetail();
+				for(int i=1;i<5;i++) {
+					switch(i) {
+					case 1:if(fc.getFile1()!=null) {
+						files.setFile1(fc.getFile1());
+					}break;
+					case 2:if(fc.getFile2()!=null) {
+						files.setFile2(fc.getFile2());
+					}break;
+					case 3:if(fc.getFile3()!=null) {
+						files.setFile3(fc.getFile3());
+					}break;
+					case 4:if(fc.getFile4()!=null) {
+						files.setFile4(fc.getFile4());
+					}break;
+					}
 				}
+				tmpCd.setFiles(files);
 			}
-			tmpCd.setFiles(files);
 			tmpCd.setUsername(urepository.findById(cobj.getUserID()).get().getName());
 			cd.add(tmpCd);
 		}
@@ -397,7 +352,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 					try {
 						String path="user" + File.separator + replacesuid + File.separator + "emoji"
 								+ File.separator;
-						
+
 						File file = new File(path+ title + "." + fileType);
 						Files.createDirectories(Paths.get(path));
 						//f.createNewFile();

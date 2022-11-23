@@ -5,18 +5,20 @@ export default function (props: any) {
   const json = props.json;
   const [length, setlength] = useState(0);
   useEffect(() => {
-    if (json["files"]["file1"] !== undefined) {
-      setlength(1);
-      console.log("length:" + 1);
-      if (json["files"]["file2"] !== undefined) {
-        setlength(2);
-        console.log("length:" + 2);
-        if (json["files"]["file3"] !== undefined) {
-          setlength(3);
-          console.log("length:" + 3);
-          if (json["files"]["file4"] !== undefined) {
-            setlength(4);
-            console.log("length:" + 4);
+    if ("files" in json) {
+      if ("file1" in json["files"]) {
+        setlength(1);
+        console.log("length:" + 1);
+        if (json["files"]["file2"] !== undefined) {
+          setlength(2);
+          console.log("length:" + 2);
+          if (json["files"]["file3"] !== undefined) {
+            setlength(3);
+            console.log("length:" + 3);
+            if (json["files"]["file4"] !== undefined) {
+              setlength(4);
+              console.log("length:" + 4);
+            }
           }
         }
       }
