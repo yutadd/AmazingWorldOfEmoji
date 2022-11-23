@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class HistoryKey implements Serializable{
+	
 	private String uid;
 	private Time date;
 }

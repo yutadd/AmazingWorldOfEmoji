@@ -7,7 +7,10 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
+import PostAddIcon from "@mui/icons-material/PostAdd";
 import Grid from "@mui/material/Grid";
+import Post from "./Post";
+
 import "./App.css";
 export type ContextType = [
   right: any,
@@ -35,6 +38,7 @@ function App() {
   const [right, setRight] = useState(
     <>
       <Paper
+        style={{ color: "#9C27B0", fontSize: "1.3vw", fontWeight: "500" }}
         sx={{
           mt: "2vh", //margin-y 8px
           mx: 1, //margin-x
@@ -49,13 +53,14 @@ function App() {
   const [inputLoginID, setLoginInputID] = useState("");
   const [inputLoginPass, setLoginInputPass] = useState("");
   const [loginError, setLoginError] = useState("");
-
+  const [showPost, setShowPost] = useState(false);
   const [showS, setShowS] = useState(false);
   const [inputSignID, setSignInputID] = useState("");
   const [inputSignPass, setSignInputPass] = useState("");
   const [inputSignName, setSignInputName] = useState("");
   const [inputSignEmail, setSignInputEmail] = useState("");
   const [inputSignBirth, setSignInputBirth] = useState("");
+
   const [SignError, setSignError] = useState("");
   let init: ContextType = [
     right,
@@ -88,6 +93,7 @@ function App() {
       <Card
         className="dialog"
         style={{
+          right: 0,
           display: showL ? "block" : "none",
           zIndex: 99,
           position: "absolute",
@@ -96,7 +102,7 @@ function App() {
         <Grid style={{ textAlign: "left" }} sx={{ px: "1vw" }}>
           <TextField
             sx={{ pt: "1vh", pb: "1vh", width: "100%" }}
-            autoComplete="id"
+            autoComplete="username"
             type={"text"}
             placeholder="ID"
             onChange={(e) => {
@@ -132,6 +138,7 @@ function App() {
       <Card
         className="dialog"
         style={{
+          right: 0,
           display: showS ? "block" : "none",
           zIndex: 99,
           position: "absolute",
@@ -143,6 +150,7 @@ function App() {
             value={inputSignID}
             type={"text"}
             id={"name"}
+            autoComplete="username"
             placeholder="userID"
             onChange={(e) => {
               setSignInputID(e.target.value);
@@ -153,6 +161,7 @@ function App() {
             sx={{ pb: "1vh", width: "100%" }}
             value={inputSignPass}
             placeholder="password"
+            autoComplete="password"
             type={"password"}
             id={"password"}
             onChange={(e) => {
@@ -164,6 +173,7 @@ function App() {
             sx={{ pb: "1vh", width: "100%" }}
             value={inputSignName}
             placeholder="display name"
+            autoComplete="name"
             type={"text"}
             id={"nickname"}
             onChange={(e) => {
@@ -175,6 +185,7 @@ function App() {
             sx={{ pb: "1vh", width: "100%" }}
             value={inputSignEmail}
             placeholder="email"
+            autoComplete="email"
             type={"email"}
             id={"email"}
             onChange={(e) => {
@@ -184,6 +195,7 @@ function App() {
           <br />
           <TextField
             sx={{ pb: "1vh", width: "100%" }}
+            autoComplete="birthday"
             value={inputSignBirth}
             placeholder="birth"
             type={"date"}
@@ -263,6 +275,23 @@ function App() {
       })
     );
   }
+  function StartPostButton() {
+    return (
+      <PostAddIcon
+        color="secondary"
+        onClick={() => {
+          setShowPost(true);
+        }}
+        sx={{ fontSize: "15vh" }}
+        style={{
+          left: 0,
+          bottom: 0,
+          position: "fixed",
+          //paddingTop: "75vh",
+        }}
+      ></PostAddIcon>
+    );
+  }
   console.log("displayid : " + displayId);
   return (
     <>
@@ -270,6 +299,12 @@ function App() {
         <header>{header}</header>
         {displayId === "default" && loginDialog()}
         {displayId === "default" && signupDialog()}
+        {displayId !== "default" && (
+          <Post show={showPost} setShow={setShowPost} />
+        )}
+
+        {displayId !== "default" && <StartPostButton />}
+
         <Home />
       </Context.Provider>
     </>

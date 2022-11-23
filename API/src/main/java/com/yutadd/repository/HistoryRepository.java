@@ -1,4 +1,4 @@
-package com.yutadd.model;
+package com.yutadd.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

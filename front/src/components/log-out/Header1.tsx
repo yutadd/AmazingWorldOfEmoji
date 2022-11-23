@@ -14,9 +14,7 @@ import Grid from "@mui/material/Grid";
 import ".././Header.css";
 import Avatar from "@mui/material/Avatar";
 import { Context } from "../App";
-
 import { Autocomplete } from "@mui/material";
-import { sizeWidth } from "@mui/system";
 
 export default function Header1() {
   const [
@@ -31,7 +29,6 @@ export default function Header1() {
   ] = useContext(Context);
   const [text, setText] = useState("");
   const [assist, setAssist] = useState([""]);
-
   function json2yaml(detail: JSON): JSX.Element[] {
     const YAML = require("yaml");
     const doc = new YAML.Document();
@@ -95,12 +92,13 @@ export default function Header1() {
     <>
       <Toolbar sx={{ height: "6vh", borderBottom: 1, borderColor: "divider" }}>
         <Autocomplete
+          color="secondary"
           style={{ width: "17vw" }}
           options={assist}
           renderInput={(params) => (
-            //下            params
             <TextField
               {...params}
+              color="secondary"
               label="search"
               autoComplete="off"
               placeholder="userid.title"
@@ -111,6 +109,7 @@ export default function Header1() {
             return (
               <li {...props} style={{ borderBottom: "1px solid grey" }}>
                 <div
+                  style={{ color: "#9C27B0" }}
                   onClick={() => {
                     showResultRight(option);
                   }}
@@ -141,17 +140,29 @@ export default function Header1() {
           }}
         />
         <IconButton
+          color="secondary"
           onClick={() => {
             console.log("");
           }}
         >
-          <SearchIcon>search</SearchIcon>
+          <SearchIcon color="secondary"></SearchIcon>
         </IconButton>
-        <Typography color="inherit" textAlign="center" noWrap sx={{ flex: 1 }}>
-          <span className="title">TheAmazingWorldOfEmoji</span>
+        <Typography
+          className="title"
+          component="h2"
+          variant="h5"
+          fontWeight={600}
+          color="secondary"
+          align="center"
+          noWrap
+          fontSize={"2vw"}
+          sx={{ flex: 1, ml: "-13.5vw" }}
+        >
+          TheAmazingWorldOfEmoji
         </Typography>
         <img style={{ marginLeft: "auto" }} src="icon.png" height={30} />
         <Button
+          color="secondary"
           sx={{ ml: "auto", mr: "0px" }}
           onClick={() => {
             if (!showL) {
@@ -165,6 +176,7 @@ export default function Header1() {
           log-in
         </Button>
         <Button
+          color="secondary"
           sx={{ ml: "auto", mr: "0px" }}
           onClick={() => {
             if (!showS) {
