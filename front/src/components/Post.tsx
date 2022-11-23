@@ -15,6 +15,7 @@ import { isEmptyBindingElement } from "typescript";
 export default function Post(props: any) {
   const [manuscript, setManuscript] = useState("");
   const inputTextObj = useRef<HTMLDivElement>();
+  const ignoreOnce = useRef<boolean>(false);
   function reducer(
     state: { index: number; file: File }[],
     action: { index: number; action: string; file: File }
@@ -36,6 +37,9 @@ export default function Post(props: any) {
     for (let i = 0; i < images.length; i++) {
       form.append("files", images[i]["file"]);
     }
+    if (images.length == 0) {
+      form.append("files", "空");
+    }
     form.append("message", validatedText);
     fetch("/api/share/post/message", { method: "POST", body: form });
     alert("posted your perfect comment!");
@@ -52,27 +56,44 @@ export default function Post(props: any) {
     return replacetarget;
   };
   const analyze = async (originaltxt: string, index: number): Promise<any> => {
-    if (originaltxt.charAt(index) === ":") {
-      let name = "";
-      for (let f = index + 1; f < originaltxt.length; f++) {
-        if (originaltxt.charAt(f) === ":") {
-          const promise = await fetch(
-            "/api/share/get/getEmojiDetail?path=" + name
-          );
-          const emojijson = await promise.json();
-          return (
-            '<img width="25"src="/api/share/get/emoji?emoji=' +
-            name +
-            "&type=" +
-            emojijson["type"] +
-            '" />' +
-            (f !== originaltxt.length - 1
-              ? await analyze(originaltxt, name.length + 2)
-              : "")
-          );
+    if (originaltxt.charAt(index) !== "'") {
+      if (originaltxt.charAt(index) === ":") {
+        if (!ignoreOnce.current) {
+          let name = "";
+          for (let f = index + 1; f < originaltxt.length; f++) {
+            if (originaltxt.charAt(f) === ":") {
+              const promise = await fetch(
+                "/api/share/get/getEmojiDetail?path=" + name
+              );
+              const emojijson = await promise.json();
+              return (
+                '<img width="25"src="/api/share/get/emoji?emoji=' +
+                name +
+                "&type=" +
+                emojijson["type"] +
+                '" />' +
+                (f !== originaltxt.length - 1
+                  ? await analyze(originaltxt, name.length + 2)
+                  : "")
+              );
+            } else {
+              name = name + originaltxt.charAt(f);
+            }
+          }
         } else {
-          name = name + originaltxt.charAt(f);
+          ignoreOnce.current = false;
         }
+      }
+    } else {
+      ignoreOnce.current = true;
+      if (originaltxt.charAt(index + 1) === ":") {
+        index += 1;
+        return (
+          "':" +
+          (index !== originaltxt.length - 1
+            ? await analyze(originaltxt, index + 1)
+            : "")
+        );
       }
     }
     return (
