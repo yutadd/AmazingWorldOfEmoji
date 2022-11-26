@@ -8,40 +8,60 @@ import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import CloseIcon from "@mui/icons-material/Close";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import SendIcon from "@mui/icons-material/Send";
-import Grid from "@mui/material/Grid";
-import { FormControlUnstyled } from "@mui/base";
-import { isEmptyBindingElement } from "typescript";
-import { getByText } from "@testing-library/react";
+import IconButton from "@mui/material/IconButton";
+import { Avatar } from "@mui/material";
 /*予約された文字:§*/
 export default function Post(props: any) {
   const [manuscript, setManuscript] = useState("");
   const inputTextObj = useRef<HTMLDivElement>();
   const ignoreOnce = useRef<boolean>(false);
+  function copyState(state: { indexes: number[]; files: File[] }) {
+    const ret: { indexes: number[]; files: File[] } = {
+      indexes: [],
+      files: [],
+    };
+    for (let i = 0; i < state.files.length; i++) {
+      ret.files = [...state.files];
+      ret.indexes = [...state.indexes];
+    }
+    return ret;
+  }
   function reducer(
-    state: { index: number; file: File }[],
+    state: { indexes: number[]; files: File[] },
     action: { index: number; action: string; file: File }
-  ): { index: number; file: File }[] {
+  ): { indexes: number[]; files: File[] } {
     if (action.action === "add") {
-      const newarray = [...state];
-      newarray.push({ index: action.index, file: action.file });
-      return newarray;
+      console.log("previousState");
+      console.log(state);
+      let newState = copyState(state);
+      newState.files.push(action.file);
+      newState.indexes.push(action.index);
+      console.log("processedState");
+      console.log(state);
+      console.log("same?:" + Object.is(state, newState));
+      return newState;
     } else if (action.action === "remove") {
-      const newarray = [...state];
-      newarray.splice(action.index, 1);
-      return newarray;
+      return state;
     } else {
       return state;
     }
   }
+  const initial: { indexes: number[]; files: File[] } = {
+    indexes: [],
+    files: [],
+  };
+
+  const [images, setImages] = useReducer(reducer, initial);
+
   const post = (validatedText: string) => {
     let files: File[] = [];
     let form = new FormData();
-    for (let i = 0; i < images.length; i++) {
-      form.append("files", images[i]["file"]);
-      files.push(images[i]["file"]);
+    for (let i = 0; i < images.files.length; i++) {
+      form.append("files", images.files[i]);
+      files.push(images.files[i]);
     }
     form.append("message", validatedText);
-    if (images.length == 0) {
+    if (images.files.length == 0) {
       fetch("/api/share/post/message", { method: "POST", body: form });
       alert("posted your perfect comment!");
     } else {
@@ -108,8 +128,7 @@ export default function Post(props: any) {
         : "")
     );
   };
-  const initial: { index: number; file: File }[] = [];
-  const [images, setImages] = useReducer(reducer, initial);
+
   return (
     <Modal
       open={props.show}
@@ -147,7 +166,7 @@ export default function Post(props: any) {
           textAlign: "left",
           display: "inline-block",
         }}
-        sx={{ mt: "4.5vh", ml: "30vw", p: "30px" }}
+        sx={{ pr: "40px", mt: "4.5vh", ml: "30vw", pt: "30px", pl: "30px" }}
       >
         <CloseIcon
           color="secondary"
@@ -161,96 +180,94 @@ export default function Post(props: any) {
             position: "absolute",
           }}
         />
-        <div style={{ position: "relative", display: "inline" }}>
-          <div
-            style={{
-              overflow: "hidden",
-              width: "40vw",
-              paddingTop: "10px",
-              /*marginLeft: "30vw",*/
-              border: "2px solid gray",
-              borderRadius: "16px",
-              display: "inline-block",
-            }}
-          >
-            <div
-              placeholder="text here..."
-              role="textbox"
-              id="inputting"
-              onInput={(e) => {
-                const dou = async (current: EventTarget & HTMLDivElement) => {
-                  const cursor = document.getSelection()?.focusOffset as number; //入力後のカーソル位置
-                  const previousAnchorObj = document.getSelection()
-                    ?.anchorNode as Node; //inputElementから見た入力後カーソルがあるオブジェクト
-                  let previousIndex = 0;
-                  const parentObj =
-                    document.getSelection()?.focusNode?.parentNode;
-                  for (
-                    let i = 0;
-                    i <
-                    (parentObj?.childNodes.length
-                      ? parentObj?.childNodes.length
-                      : 0);
-                    i++
-                  ) {
-                    if (
-                      parentObj?.childNodes
-                        .item(i)
-                        .isEqualNode(previousAnchorObj)
-                    ) {
-                      previousIndex = i;
-                    }
-                  }
-                  current.innerHTML = await analyze(current.innerHTML, 0); //絵文字挿入を行う
 
-                  const currentAnchorNode = document.getSelection()?.anchorNode
-                    ?.childNodes[previousIndex] as Node;
-                  const range = document.createRange();
-                  range.setStart(currentAnchorNode, cursor);
-                  document.getSelection()?.removeAllRanges();
-                  document.getSelection()?.addRange(range);
-                };
-                if (e.currentTarget.innerHTML !== "") {
-                  dou(e.currentTarget);
-                  console.log(images);
+        <div
+          style={{
+            overflow: "hidden",
+            width: "40vw",
+            paddingTop: "10px",
+            /*marginLeft: "30vw",*/
+            border: "2px solid gray",
+            borderRadius: "16px",
+            display: "inline-block",
+          }}
+        >
+          <div
+            placeholder="text here..."
+            role="textbox"
+            id="inputting"
+            onInput={(e) => {
+              const dou = async (current: EventTarget & HTMLDivElement) => {
+                const cursor = document.getSelection()?.focusOffset as number; //入力後のカーソル位置
+                const previousAnchorObj = document.getSelection()
+                  ?.anchorNode as Node; //inputElementから見た入力後カーソルがあるオブジェクト
+                let previousIndex = 0;
+                const parentObj =
+                  document.getSelection()?.focusNode?.parentNode;
+                for (
+                  let i = 0;
+                  i <
+                  (parentObj?.childNodes.length
+                    ? parentObj?.childNodes.length
+                    : 0);
+                  i++
+                ) {
+                  if (
+                    parentObj?.childNodes.item(i).isEqualNode(previousAnchorObj)
+                  ) {
+                    previousIndex = i;
+                  }
                 }
-                inputTextObj.current = e.currentTarget;
-              }}
-              color={grey[500]}
-              contentEditable="true"
-              spellCheck="true"
-              style={{
-                padding: "5px",
-                overflowY: "scroll",
-                fontSize: "25px",
-                fontFamily: "メイリオ",
-                resize: "none",
-                outline: "none",
-                height: "160px",
-              }}
-            ></div>
-          </div>
-          <SendIcon
-            onClick={(e) => {
-              post(
-                commentToOriginal(inputTextObj.current?.innerHTML as string)
-              );
+                current.innerHTML = await analyze(current.innerHTML, 0); //絵文字挿入を行う
+
+                const currentAnchorNode = document.getSelection()?.anchorNode
+                  ?.childNodes[previousIndex] as Node;
+                const range = document.createRange();
+                range.setStart(currentAnchorNode, cursor);
+                document.getSelection()?.removeAllRanges();
+                document.getSelection()?.addRange(range);
+              };
+              if (e.currentTarget.innerHTML !== "") {
+                dou(e.currentTarget);
+                console.log(images);
+              }
+              inputTextObj.current = e.currentTarget;
             }}
-            color="secondary"
-            style={{ fontSize: "80px" }}
-          />
-          <br />
-          <InsertPhotoIcon
-            color="secondary"
-            sx={{ mr: "20px" }}
-            style={{ fontSize: "80px" }}
-          />
-          <AddReactionIcon
-            color="secondary"
-            sx={{ mr: "20px" }}
-            style={{ fontSize: "80px" }}
-          />
+            color={grey[500]}
+            contentEditable="true"
+            spellCheck="true"
+            style={{
+              padding: "5px",
+              overflowY: "scroll",
+              fontSize: "25px",
+              fontFamily: "メイリオ",
+              resize: "none",
+              outline: "none",
+              height: "160px",
+            }}
+          ></div>
         </div>
+        <br />
+        <IconButton>
+          <InsertPhotoIcon color="secondary" style={{ fontSize: "46px" }} />
+        </IconButton>
+        <IconButton>
+          <AddReactionIcon color="secondary" style={{ fontSize: "46px" }} />
+        </IconButton>
+        <IconButton
+          onClick={(e) => {
+            post(commentToOriginal(inputTextObj.current?.innerHTML as string));
+          }}
+        >
+          <SendIcon color="secondary" style={{ fontSize: "46px" }} />
+        </IconButton>
+        {images.files.map((element) => (
+          <img
+            width="50px"
+            src={URL.createObjectURL(element)}
+            alt={URL.createObjectURL(element)}
+          ></img>
+        ))}
       </Card>
     </Modal>
   );
