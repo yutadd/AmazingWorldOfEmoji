@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 export default function ShowDetailRight(values: any) {
+  const [length, setlength] = useState(0);
   console.log(values);
   let name = values.name;
   let json = values.json;
@@ -35,6 +36,24 @@ export default function ShowDetailRight(values: any) {
       e.json().then((newJson) => {
         json = newJson;
         detailYml = json2yaml(json);
+        if ("files" in json) {
+          if ("file1" in json["files"]) {
+            setlength(1);
+            console.log("length:" + 1);
+            if (json["files"]["file2"] !== undefined) {
+              setlength(2);
+              console.log("length:" + 2);
+              if (json["files"]["file3"] !== undefined) {
+                setlength(3);
+                console.log("length:" + 3);
+                if (json["files"]["file4"] !== undefined) {
+                  setlength(4);
+                  console.log("length:" + 4);
+                }
+              }
+            }
+          }
+        }
       });
     });
   }
@@ -88,18 +107,10 @@ export default function ShowDetailRight(values: any) {
         </Grid>
       </CardContent>
       <Grid>
-        {json["files"]["file1"] !== undefined && (
-          <ImageComponent link={json["files"]["file1"]} />
-        )}
-        {json["files"]["file2"] !== undefined && (
-          <ImageComponent link={json["files"]["file2"]} />
-        )}
-        {json["files"]["file3"] !== undefined && (
-          <ImageComponent link={json["files"]["file3"]} />
-        )}
-        {json["files"]["file4"] !== undefined && (
-          <ImageComponent link={json["files"]["file4"]} />
-        )}
+        {length > 0 && <ImageComponent link={json["files"]["file1"]} />}
+        {length > 1 && <ImageComponent link={json["files"]["file2"]} />}
+        {length > 2 && <ImageComponent link={json["files"]["file3"]} />}
+        {length > 3 && <ImageComponent link={json["files"]["file4"]} />}
       </Grid>
       <CardActions disableSpacing></CardActions>
     </Card>

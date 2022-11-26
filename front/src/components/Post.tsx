@@ -15,6 +15,7 @@ export default function Post(props: any) {
   const [manuscript, setManuscript] = useState("");
   const inputTextObj = useRef<HTMLDivElement>();
   const ignoreOnce = useRef<boolean>(false);
+  const changedText = useRef<boolean>(false);
   function copyState(state: { indexes: number[]; files: File[] }) {
     const ret: { indexes: number[]; files: File[] } = {
       indexes: [],
@@ -31,14 +32,9 @@ export default function Post(props: any) {
     action: { index: number; action: string; file: File }
   ): { indexes: number[]; files: File[] } {
     if (action.action === "add") {
-      console.log("previousState");
-      console.log(state);
       let newState = copyState(state);
       newState.files.push(action.file);
       newState.indexes.push(action.index);
-      console.log("processedState");
-      console.log(state);
-      console.log("same?:" + Object.is(state, newState));
       return newState;
     } else if (action.action === "remove") {
       return state;
@@ -83,6 +79,7 @@ export default function Post(props: any) {
   const analyze = async (originaltxt: string, index: number): Promise<any> => {
     if (originaltxt.charAt(index) !== "'") {
       if (originaltxt.charAt(index) === ":") {
+        console.log("there is" + index);
         if (!ignoreOnce.current) {
           let name = "";
           for (let f = index + 1; f < originaltxt.length; f++) {
@@ -91,14 +88,15 @@ export default function Post(props: any) {
                 "/api/share/get/getEmojiDetail?path=" + name
               );
               const emojijson = await promise.json();
+              changedText.current = true;
               return (
                 '<img width="25"src="/api/share/get/emoji?emoji=' +
                 name +
                 "&type=" +
                 emojijson["type"] +
                 '" />' +
-                (f !== originaltxt.length - 1
-                  ? await analyze(originaltxt, name.length + 2)
+                (f < originaltxt.length
+                  ? await analyze(originaltxt, f + 1)
                   : "")
               );
             } else {
@@ -115,7 +113,7 @@ export default function Post(props: any) {
         index += 1;
         return (
           "':" +
-          (index !== originaltxt.length - 1
+          (index < originaltxt.length
             ? await analyze(originaltxt, index + 1)
             : "")
         );
@@ -123,9 +121,7 @@ export default function Post(props: any) {
     }
     return (
       originaltxt.charAt(index) +
-      (index !== originaltxt.length - 1
-        ? await analyze(originaltxt, index + 1)
-        : "")
+      (index < originaltxt.length ? await analyze(originaltxt, index + 1) : "")
     );
   };
 
@@ -166,21 +162,8 @@ export default function Post(props: any) {
           textAlign: "left",
           display: "inline-block",
         }}
-        sx={{ pr: "40px", mt: "4.5vh", ml: "30vw", pt: "30px", pl: "30px" }}
+        sx={{ mt: "4.5vh", ml: "30vw", pt: "30px", pl: "30px" }}
       >
-        <CloseIcon
-          color="secondary"
-          onClick={() => props.setShow(false)}
-          sx={{
-            pl: "40vw",
-          }}
-          style={{
-            textAlign: "right",
-            fontSize: "42px",
-            position: "absolute",
-          }}
-        />
-
         <div
           style={{
             overflow: "hidden",
@@ -201,35 +184,47 @@ export default function Post(props: any) {
                 const cursor = document.getSelection()?.focusOffset as number; //入力後のカーソル位置
                 const previousAnchorObj = document.getSelection()
                   ?.anchorNode as Node; //inputElementから見た入力後カーソルがあるオブジェクト
+                //console.log(previousAnchorObj);
                 let previousIndex = 0;
-                const parentObj =
-                  document.getSelection()?.focusNode?.parentNode;
+                const parentObj = document.getElementById("inputting");
                 for (
                   let i = 0;
-                  i <
-                  (parentObj?.childNodes.length
-                    ? parentObj?.childNodes.length
-                    : 0);
+                  i < (current.childNodes?.length as number);
                   i++
                 ) {
                   if (
-                    parentObj?.childNodes.item(i).isEqualNode(previousAnchorObj)
+                    current.childNodes.item(i).textContent ===
+                    previousAnchorObj.textContent
                   ) {
+                    //console.log("found was :" + i);
+                    /*console.log(
+                      current.childNodes.item(i).textContent +
+                        "\r\nVS\r\n" +
+                        previousAnchorObj.textContent
+                    );*/
                     previousIndex = i;
                   }
                 }
-                current.innerHTML = await analyze(current.innerHTML, 0); //絵文字挿入を行う
+                console.log(current.innerHTML);
+                const newtext = await analyze(current.innerHTML, 0);
+                if (changedText.current) {
+                  current.innerHTML = newtext; //絵文字挿入を行う
+                  changedText.current = false;
+                }
 
-                const currentAnchorNode = document.getSelection()?.anchorNode
-                  ?.childNodes[previousIndex] as Node;
-                const range = document.createRange();
-                range.setStart(currentAnchorNode, cursor);
+                //console.log(previousIndex);
+                /*const range = document.createRange();
+                range.setStart(
+                  previousIndex == 0
+                    ? current.childNodes[0]
+                    : current.childNodes[previousIndex].childNodes[0],
+                  cursor
+                );
                 document.getSelection()?.removeAllRanges();
-                document.getSelection()?.addRange(range);
+                document.getSelection()?.addRange(range);*/
               };
               if (e.currentTarget.innerHTML !== "") {
                 dou(e.currentTarget);
-                console.log(images);
               }
               inputTextObj.current = e.currentTarget;
             }}
@@ -247,6 +242,14 @@ export default function Post(props: any) {
             }}
           ></div>
         </div>
+        <IconButton onClick={() => props.setShow(false)}>
+          <CloseIcon
+            color="secondary"
+            style={{
+              fontSize: "42px",
+            }}
+          />
+        </IconButton>
         <br />
         <IconButton>
           <InsertPhotoIcon color="secondary" style={{ fontSize: "46px" }} />
@@ -256,13 +259,22 @@ export default function Post(props: any) {
         </IconButton>
         <IconButton
           onClick={(e) => {
-            post(commentToOriginal(inputTextObj.current?.innerHTML as string));
+            post(
+              commentToOriginal(
+                inputTextObj.current?.innerHTML
+                  .replaceAll("<div>", "")
+                  .replaceAll("</div>", "")
+                  .replaceAll("&nbsp;", " ") as string
+              )
+            );
+            props.setShow(false);
           }}
         >
           <SendIcon color="secondary" style={{ fontSize: "46px" }} />
         </IconButton>
         {images.files.map((element) => (
           <img
+            key={element.name}
             width="50px"
             src={URL.createObjectURL(element)}
             alt={URL.createObjectURL(element)}

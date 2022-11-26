@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
@@ -33,6 +33,56 @@ export default function CommentCard(property: any) {
       })
     );
   }
+  const ignoreOnce = useRef<boolean>(false);
+  const analyze = async (originaltxt: string, index: number): Promise<any> => {
+    if (originaltxt.charAt(index) !== "'") {
+      if (originaltxt.charAt(index) === "§") {
+        console.log("there is" + index);
+        if (!ignoreOnce.current) {
+          let name = "";
+          for (let f = index + 1; f < originaltxt.length; f++) {
+            if (originaltxt.charAt(f) === "§") {
+              const promise = await fetch(
+                "/api/share/get/getEmojiDetail?path=" + name
+              );
+              const emojijson = await promise.json();
+
+              return (
+                '<img width="25"src="/api/share/get/emoji?emoji=' +
+                name +
+                "&type=" +
+                emojijson["type"] +
+                '" />' +
+                (f <= originaltxt.length
+                  ? await analyze(originaltxt, f + 1)
+                  : "")
+              );
+            } else {
+              name = name + originaltxt.charAt(f);
+            }
+          }
+        } else {
+          ignoreOnce.current = false;
+        }
+      }
+    } else {
+      ignoreOnce.current = true;
+      if (originaltxt.charAt(index + 1) === ":") {
+        index += 1;
+        return (
+          "':" +
+          (index < originaltxt.length
+            ? await analyze(originaltxt, index + 1)
+            : "")
+        );
+      }
+    }
+    return (
+      originaltxt.charAt(index) +
+      (index < originaltxt.length ? await analyze(originaltxt, index + 1) : "")
+    );
+  };
+  const [parsedText, setParsedText] = useState("");
   function update() {
     fetch(
       "/api/share/get/comment?cid=" + json["commentInfo"]["commentID"]
@@ -53,6 +103,11 @@ export default function CommentCard(property: any) {
     });
   }
   useEffect(() => {
+    const parse = async () => {
+      setParsedText(await analyze(json["commentInfo"]["text"], 0));
+      console.log("翻訳完了");
+    };
+    parse();
     if (json["liked"] === "true") {
       setLiked(true);
     } else {
@@ -65,7 +120,11 @@ export default function CommentCard(property: any) {
   return (
     <Paper
       key={json["commentInfo"]["commentID"]}
-      style={{ display: showMe ? "block" : "none", maxHeight: "50vh" }}
+      style={{
+        display: showMe ? "block" : "none",
+        maxHeight: "50vh",
+        overflowY: "scroll",
+      }}
       sx={{
         mt: "0.8vh", //margin-y 8px
         mx: 1, //margin-x
@@ -110,7 +169,11 @@ export default function CommentCard(property: any) {
             style={{ wordBreak: "break-word" }}
             sx={{ mt: "1vh" }}
           >
-            {json["commentInfo"]["text"]}
+            <div
+              dangerouslySetInnerHTML={{
+                __html: parsedText,
+              }}
+            ></div>
           </Typography>
           <Grid
             style={{

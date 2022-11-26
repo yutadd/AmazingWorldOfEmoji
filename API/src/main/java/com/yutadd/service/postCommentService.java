@@ -83,7 +83,7 @@ public class postCommentService {
 			}
 			c.setUserID(uid);
 			c.setCommentID(cID.toString(16));
-			c.setText(message);
+			c.setText(validation(message));
 			frepository.save(fc);
 			c.setTime(Date.valueOf(LocalDate.now()));
 			crepository.save(c);
