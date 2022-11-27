@@ -7,7 +7,11 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.FileContainer;
+import com.yutadd.model.entity.User;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.FileContainerRepository;
 
@@ -68,38 +73,40 @@ public class postCommentService {
 		}else filecheck=false;
 		return filecheck;
 	}
-	static public ResponseEntity<String> postCommentWithFile(String message,MultipartFile[] files,String uid,FileContainerRepository frepository,CommentRepository crepository) {
+	static public ResponseEntity<String> postCommentWithFile(String message,MultipartFile[] files,User user,FileContainerRepository frepository,CommentRepository crepository) {
 		Comment c=new Comment();
 		long timestamp=(System.currentTimeMillis());
 		FileContainer fc=null;
 		Random rn = new Random();
 		BigInteger cID= new BigInteger(255,rn);
-		if(filecheck(files)) {
+		
+			c.setUser(user);
+			c.setCommentid(cID.toString(16));
+			c.setText(validation(message));
+			c.setTime(Timestamp.valueOf(LocalDateTime.now()));
+			crepository.save(c);
+			if(filecheck(files)) {
 			try {
-				fc=registFile(files, uid);
-				fc.setCommentID(cID.toString(16));
+				fc=registFile(files,user.getUserid());
+				fc.setComment(c);
+				fc.setFileid(new BigInteger(256,new Random()).toString(16));
 			}catch(Exception e) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("faild to create file or directory");
 			}
-			c.setUserID(uid);
-			c.setCommentID(cID.toString(16));
-			c.setText(validation(message));
 			frepository.save(fc);
-			c.setTime(Date.valueOf(LocalDate.now()));
-			crepository.save(c);
 			return ResponseEntity.status(HttpStatus.OK).body("OK");
 		}else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_FILET");
 		}
 	}
-	static public ResponseEntity<String> postComment(String message,String uid,CommentRepository crepository) {
+	static public ResponseEntity<String> postComment(String message,User user,CommentRepository crepository) {
 		Comment c=new Comment();
 		Random rn = new Random();
 		BigInteger cID= new BigInteger(255,rn);
-			c.setUserID(uid);
-			c.setCommentID(cID.toString(16));
+			c.setUser(user);
+			c.setCommentid(cID.toString(16));
 			c.setText(validation(message));
-			c.setTime(Date.valueOf(LocalDate.now()));
+			c.setTime(Timestamp.valueOf(LocalDateTime.now()));
 			crepository.save(c);
 			return ResponseEntity.status(HttpStatus.OK).body("OK");
 		

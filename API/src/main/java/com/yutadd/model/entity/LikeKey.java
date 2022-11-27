@@ -8,6 +8,5 @@ import lombok.Data;
 
 @Data
 public class LikeKey  implements Serializable{
-	private String userID;
-	private String commentID;
+	private String likeid;
 }

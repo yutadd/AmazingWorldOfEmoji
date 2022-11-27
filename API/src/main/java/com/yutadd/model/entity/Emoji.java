@@ -2,6 +2,8 @@ package com.yutadd.model.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
@@ -15,8 +17,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Emoji {
-	@NotBlank
-	private String userID;
+	@ManyToOne
+	@JoinColumn(name="userid",referencedColumnName = "userid")
+	private User user;
 	@NotBlank
 	private String title;
 	@NotBlank
@@ -24,5 +27,4 @@ public class Emoji {
 	@Id
 	@NotBlank
 	private String path;
-	private long popularity;
 }

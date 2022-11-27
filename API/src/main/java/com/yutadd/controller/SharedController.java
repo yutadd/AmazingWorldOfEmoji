@@ -12,7 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -46,14 +49,14 @@ import com.yutadd.model.entity.Emoji;
 import com.yutadd.model.entity.FileContainer;
 import com.yutadd.model.entity.History;
 import com.yutadd.model.entity.Like;
-import com.yutadd.model.entity.SessionID;
+import com.yutadd.model.entity.Sessions;
 import com.yutadd.model.entity.User;
 import com.yutadd.repository.CommentRepository;
 import com.yutadd.repository.EmojiRepository;
 import com.yutadd.repository.FileContainerRepository;
 import com.yutadd.repository.HistoryRepository;
 import com.yutadd.repository.LikeRepository;
-import com.yutadd.repository.SessionIDRepository;
+import com.yutadd.repository.SessionRepository;
 import com.yutadd.repository.UserRepository;
 import com.yutadd.service.postCommentService;
 
@@ -69,7 +72,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@Autowired
 	private FileContainerRepository frepository;
 	@Autowired
-	private SessionIDRepository srepository;
+	private SessionRepository srepository;
 	@Autowired
 	private HistoryRepository hrepository;
 	@Autowired
@@ -80,8 +83,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@PostMapping(value="/post/messagef")
 	public ResponseEntity<String> addComment(@RequestParam("message")String message,@RequestParam("files") MultipartFile[] files,HttpSession session) {
 		if(srepository.existsById(session.getId())) {
-			String uid=srepository.findById(session.getId()).get().getUserID();
-			return postCommentService.postCommentWithFile(message, files, uid, frepository, crepository);
+			User user=srepository.findById(session.getId()).get().getUser();
+			return postCommentService.postCommentWithFile(message, files, user, frepository, crepository);
 		}else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
 		}
@@ -89,8 +92,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@PostMapping(value="/post/message")
 	public ResponseEntity<String> addComment(@RequestParam("message")String message,HttpSession session) {
 		if(srepository.existsById(session.getId())) {
-			String uid=srepository.findById(session.getId()).get().getUserID();
-			return postCommentService.postComment(message, uid, crepository);
+			User user=srepository.findById(session.getId()).get().getUser();
+			return postCommentService.postComment(message, user, crepository);
 		}else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
 		}
@@ -118,13 +121,12 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> getNewPosts(HttpSession session, @RequestParam("cid") String cid) {
 		if (crepository.existsById(cid)) {
-			Like l = new Like();
-			l.setCommentID(cid);
+			Comment c=crepository.findById(cid).get();
 			if (srepository.existsById(session.getId())) {
-				l.setUserID(srepository.findById(session.getId()).get().getUserID());
-				Comment c = crepository.findById(cid).get();
-				c.setLikes((c.getLikes() + 1));
-				crepository.save(c);
+				Like l = new Like();
+				l.setComment(c);
+				l.setUser(c.getUser());
+				l.setLikeid(new BigInteger(256,new Random()).toString(16));
 				lrepository.save(l);
 				return ResponseEntity.status(HttpStatus.OK).body("OK");
 			} else {
@@ -139,54 +141,53 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@ResponseBody
 	public ResponseEntity<String> getComment(HttpSession session, @RequestParam("cid") String cid) {
 		Comment c;
-		String uid = "";
-		if (srepository.existsById(session.getId())) {
-			uid = srepository.findById(session.getId()).get().getUserID();
-		}
+		User senderUser = null;
 		CommentDetail cd = new CommentDetail();
+		if (srepository.existsById(session.getId())) {
+			senderUser = srepository.findById(session.getId()).get().getUser();
+		}
 		if (crepository.existsById(cid)) {
 			c = crepository.findById(cid).get();
-			if (urepository.existsById(c.getUserID())) {
-				List<Like> likes = lrepository.findAllByCID(cid);
-				if (!uid.equals("") && !likes.isEmpty()) {
-					for (Like l : likes) {
-						if (l.getUserID().equals(uid)) {
-							cd.setLiked("true");
-							break;
-						} else {
-							cd.setLiked("false");
-						}
-					}
-				} else {
+			if (senderUser!=null) {
+				Like l=new Like();
+				l.setComment(c);
+				l.setUser(senderUser);
+				List<Like> likelist=lrepository.findByCID(cid);
+				if(likelist.contains(l)) {
+					cd.setLiked("true");
+				}else {
 					cd.setLiked("false");
 				}
-				if(frepository.existsById(cid)) {
-					FileContainer fc=frepository.findById(cid).get();
-					FileDetail files=new FileDetail();
-					for(int i=1;i<5;i++) {
-						switch(i) {
-						case 1:if(fc.getFile1()!=null) {
-							files.setFile1(fc.getFile1());
-						}break;
-						case 2:if(fc.getFile2()!=null) {
-							files.setFile2(fc.getFile2());
-						}break;
-						case 3:if(fc.getFile3()!=null) {
-							files.setFile3(fc.getFile3());
-						}break;
-						case 4:if(fc.getFile4()!=null) {
-							files.setFile4(fc.getFile4());
-						}break;
-						}
-					}
-					cd.setFiles(files);
-				}
-				cd.setUsername(urepository.findById(c.getUserID()).get().getName());
-				cd.setCommentInfo(c);
-				return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
 			} else {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("INVALID_AUTH");
+				cd.setLiked("false");
 			}
+			FileContainer fc=frepository.findByCommentId(cid);
+			if(fc!=null) {
+				/*ファイルクラスを
+				 *コメントとファイル1対多で結びつけるようにすればここのコードはきれいになる
+				 * */
+				FileDetail files=new FileDetail();
+				for(int i=1;i<5;i++) {
+					switch(i) {
+					case 1:if(fc.getFile1()!=null) {
+						files.setFile1(fc.getFile1());
+					}break;
+					case 2:if(fc.getFile2()!=null) {
+						files.setFile2(fc.getFile2());
+					}break;
+					case 3:if(fc.getFile3()!=null) {
+						files.setFile3(fc.getFile3());
+					}break;
+					case 4:if(fc.getFile4()!=null) {
+						files.setFile4(fc.getFile4());
+					}break;
+					}
+				}
+				cd.setFiles(files);
+			}
+			cd.setUsername(urepository.findById(c.getUser().getUserid()).get().getName());
+			cd.setCommentInfo(c);
+			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
 		}
@@ -195,41 +196,44 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value = "/get/comments", method = RequestMethod.GET)
 	@ResponseBody
 	public String getNewComments(HttpSession session) {
-		String id;
+		Sessions sessionObj=null;
+		Boolean isLogged=false;
+		User user = null;
 		if (srepository.existsById(session.getId())) {
-			SessionID s = srepository.findById(session.getId()).get();
-			id = s.getUserID();
-		} else {
-			id = session.getId();
-		}
-		List<Comment> ret = new ArrayList<Comment>();
-		List<String> newComments = crepository.findNewComment(id, Date.valueOf(LocalDate.now().minusDays(1)));
+			sessionObj = srepository.findById(session.getId()).get();
+			user= sessionObj.getUser();
+			
+			isLogged=true;
+		} 
+		List<Comment> newComments = crepository.findNewComment( Timestamp.valueOf(LocalDateTime.now().minusHours(１)));
 		List<CommentDetail> cd = new ArrayList<CommentDetail>();
-		for (String c : newComments) {
-			Comment cobj = crepository.findById(c).get();
-			History h = new History();
-			h.setCid(c);
-			h.setUid(id);
-			h.setDate(new Time(System.currentTimeMillis()));
-			ret.add(cobj);
-			hrepository.save(h);
+		for (Comment cobj : newComments) {
+			User author=cobj.getUser();
 			CommentDetail tmpCd = new CommentDetail();
-			tmpCd.setCommentInfo(cobj);
-			List<Like> likes = lrepository.findAllByCID(c);
-			if (!likes.isEmpty()) {
-				for (Like l : likes) {
-					if (l.getUserID().equals(id)) {
-						tmpCd.setLiked("true");
-						break;
-					} else {
-						tmpCd.setLiked("false");
-					}
-				}
-			} else {
-				tmpCd.setLiked("false");
+			if(isLogged) {
+				History h = new History();
+				h.setComment(cobj);
+				user.setPassword(null);
+				h.setUser(user);
+				h.setId(new BigInteger(256,new Random()).toString(16));
+				h.setTime(new Time(System.currentTimeMillis()));
+				hrepository.save(h);
 			}
-			if(frepository.existsById(c)) {
-				FileContainer fc=frepository.findById(c).get();
+			tmpCd.setCommentInfo(cobj);
+			List<Like> likelist=lrepository.findByCID(cobj.getCommentid());
+			if(isLogged) {
+				Like l=new Like();
+				l.setComment(cobj);
+				user.setPassword(null);
+				l.setUser(user);
+				if(likelist.contains(l)) {
+					tmpCd.setLiked("true");
+				}else {
+					tmpCd.setLiked("false");
+				}
+			}
+			FileContainer fc=frepository.findByCommentId(cobj.getCommentid());
+			if(fc!=null) {
 				FileDetail files=new FileDetail();
 				for(int i=1;i<5;i++) {
 					switch(i) {
@@ -249,7 +253,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				}
 				tmpCd.setFiles(files);
 			}
-			tmpCd.setUsername(urepository.findById(cobj.getUserID()).get().getName());
+			tmpCd.setUsername(author.getName());
 			cd.add(tmpCd);
 		}
 		Gson gson = new Gson();
@@ -305,7 +309,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public ResponseEntity<String> getEmojiDetail(@RequestParam("path") String path) {
 		if (erepository.existsById(path)) {
 			Emoji e = erepository.findById(path).get();
-			User u = urepository.findById(e.getUserID()).get();
+			User u = e.getUser();
 			EmojiDetail ud = new EmojiDetail();
 			ud.setUserName(u.getName());
 			ud.setUserID(u.getUserid());
@@ -335,7 +339,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 
 	@RequestMapping(value = "/get/likes")
 	public ResponseEntity<String> getLikes(@RequestParam("cid") String cid) {
-		List<Like> likelist = lrepository.findAllByCID(cid);
+		List<Like> likelist = lrepository.findByCID(cid);
 		return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(likelist));
 	}
 
@@ -343,8 +347,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public ResponseEntity<String> addEmoji(@RequestParam("image") MultipartFile imageFile,
 			@RequestParam("title") String title, HttpSession session) {
 		if (srepository.existsById(session.getId())) {
-			String uid = srepository.findById(session.getId()).get().getUserID();
-			String replacesuid = uid.replace("@", "");
+			User user = srepository.findById(session.getId()).get().getUser();
+			String replacesuid = user.getUserid().replace("@", "");
 			if (title.matches("[a-zA-Z]*")) {
 				String contentType = imageFile.getContentType().split("/")[0];
 				String fileType = imageFile.getContentType().split("/")[1];
@@ -361,10 +365,10 @@ public class SharedController extends ResponseEntityExceptionHandler {
 						output.flush();
 						output.close();
 						Emoji emoji = new Emoji();
-						emoji.setPopularity(0);
+
 						emoji.setType(fileType);
 						emoji.setTitle(title);
-						emoji.setUserID(uid);
+						emoji.setUser(user);
 						emoji.setPath(replacesuid + "." + title);
 						erepository.save(emoji);
 						return new ResponseEntity<>(HttpStatus.OK);

@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.yutadd.model.entity.SessionID;
+import com.yutadd.model.entity.Sessions;
 import com.yutadd.model.entity.User;
-import com.yutadd.repository.SessionIDRepository;
+import com.yutadd.repository.SessionRepository;
 import com.yutadd.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -28,14 +27,14 @@ public class UserController {
 	@Autowired
 	private UserRepository urepository;
 	@Autowired
-	private SessionIDRepository srepository;
+	private SessionRepository srepository;
 
 	@RequestMapping(value="/get/logged",method=RequestMethod.GET)
 	@ResponseBody
 	public String isLogged(HttpSession session) {
 		if(srepository.existsById(session.getId())) {
-			SessionID s=srepository.findById(session.getId()).get();
-			return s.getUserID()+",true";
+			Sessions s=srepository.findById(session.getId()).get();
+			return s.getUser().getUserid()+",true";
 		}else {
 			return "null,false";
 		}
@@ -46,9 +45,9 @@ public class UserController {
 		if(urepository.existsById(id)) {
 			User u= urepository.findById(id).get();
 			if(new BCryptPasswordEncoder().matches(pass,u.getPassword())) {
-				SessionID s=new SessionID();
+				Sessions s=new Sessions();
 				s.setSessionID(session.getId());
-				s.setUserID(id);
+				s.setUser(u);
 				srepository.save(s);
 				return "accepted";
 			}
@@ -72,8 +71,8 @@ public class UserController {
 								u.setEmail(email);
 								u.setBirth(Date.valueOf(birth));
 								urepository.save(u);
-								SessionID se=new SessionID();
-								se.setUserID(id);
+								Sessions se=new Sessions();
+								se.setUser(u);
 								se.setSessionID(sessionID);
 								srepository.save(se);
 								return ResponseEntity.status(HttpStatus.OK).body("accepted");
