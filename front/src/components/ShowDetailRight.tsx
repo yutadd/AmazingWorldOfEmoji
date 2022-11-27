@@ -51,8 +51,8 @@ export default function ShowDetailRight(values: any) {
       <>
         <Grid
           style={{
-            width: "50%",
-            height: "50%",
+            width: "100%",
+            height: "100%",
             display: "inline-block",
             overflow: "hidden",
           }}
@@ -90,7 +90,7 @@ export default function ShowDetailRight(values: any) {
           </Typography>
         </Grid>
       </CardContent>
-      <Grid>
+      <Grid style={{ textAlign: "center" }}>
         {length > 0 && <ImageComponent link={json["files"]["file1"]} />}
         {length > 1 && <ImageComponent link={json["files"]["file2"]} />}
         {length > 2 && <ImageComponent link={json["files"]["file3"]} />}

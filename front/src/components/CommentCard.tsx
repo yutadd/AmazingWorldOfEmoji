@@ -10,6 +10,8 @@ import { Context } from "./App";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ImageComponent from "./ImageComponent";
+import { Card } from "@mui/material";
+import { Block } from "@material-ui/icons";
 export default function CommentCard(property: any) {
   let name = property.user;
   console.log("commentcard : " + property.user);
@@ -25,7 +27,7 @@ export default function CommentCard(property: any) {
     fetch("/api/share/post/like?cid=" + cid, { method: "POST" }).then((e) =>
       e.text().then((t) => {
         if (t == "OK") {
-          setlikes(likes + 1);
+          setlikes((plikes) => plikes + 1);
           setLiked(true);
         } else {
           alert("ログインして実行してください。");
@@ -102,6 +104,9 @@ export default function CommentCard(property: any) {
       });
     });
   }
+  function sdr() {
+    setRight(<ShowDetailRight name={name} json={json} />);
+  }
   useEffect(() => {
     const parse = async () => {
       setParsedText(await analyze(json["commentInfo"]["text"], 0));
@@ -162,11 +167,11 @@ export default function CommentCard(property: any) {
           <p className="user-id">{json["userid"]}</p>
           <Typography
             onClick={() => {
-              setRight(<ShowDetailRight name={name} json={json} />);
+              sdr(); // show detail right
               console.log("clicked :" + json["commentInfo"]["text"]);
             }}
             className="message"
-            style={{ wordBreak: "break-word" }}
+            style={{ wordBreak: "break-word", maxHeight: "5vh" }}
             sx={{ mt: "1vh" }}
           >
             <div
@@ -177,13 +182,28 @@ export default function CommentCard(property: any) {
           </Typography>
           <Grid
             style={{
+              display: "block",
               maxWidth: "100%",
-              maxHeight: "20vh",
+              maxHeight: "5vh",
               textAlign: "center",
               marginTop: "1vh",
             }}
           >
-            <ImageComponent json={json} />
+            <Typography
+              style={{
+                minWidth: "100%",
+                display: "block",
+                textAlign: "center",
+                fontSize: "0.7rem",
+                backgroundColor: "white",
+              }}
+              onClick={() => {
+                sdr(); //show detail right
+              }}
+            >
+              Click here to see details
+            </Typography>
+            <ImageComponent json={json}></ImageComponent>
           </Grid>
         </Grid>
       </Grid>

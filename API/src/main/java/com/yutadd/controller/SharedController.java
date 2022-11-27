@@ -139,19 +139,27 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value = "/get/comment")
 	@ResponseBody
 	public ResponseEntity<String> getComment(HttpSession session, @RequestParam("cid") String cid) {
-		Comment c;
+		Comment c=new Comment();
 		User senderUser = null;
 		CommentDetail cd = new CommentDetail();
 		if (srepository.existsById(session.getId())) {
 			senderUser = srepository.findById(session.getId()).get().getUser();
 		}
 		if (crepository.existsById(cid)) {
-			c = crepository.findById(cid).get();
+		Comment originalc = crepository.findById(cid).get();
+		c.setCommentid(originalc.getCommentid());
+		c.setText(originalc.getText());
+		c.setTime(originalc.getTime());
+		User tmpuser=new User();
+		tmpuser.setName(originalc.getUser().getName());
+		tmpuser.setUserid(originalc.getUser().getUserid());
+		c.setUser(tmpuser);
 			if (senderUser!=null) {
 				Like l=new Like();
 				l.setComment(c);
 				l.setUser(senderUser);
 				List<Like> likelist=lrepository.findByCID(cid);
+				cd.setLikes(likelist.size());
 				if(likelist.contains(l)) {
 					cd.setLiked("true");
 				}else {
@@ -184,10 +192,9 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				}
 				cd.setFiles(files);
 			}
-			cd.setUsername(urepository.findById(c.getUser().getUserid()).get().getName());
+			cd.setUsername(c.getUser().getName());
 			cd.setCommentInfo(c);
 			cd.setUserid(c.getUser().getUserid());
-			c.setUser(null);
 			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
@@ -208,8 +215,15 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		} 
 		List<Comment> newComments = crepository.findNewComment( Timestamp.valueOf(LocalDateTime.now().minusHours(１)));
 		List<CommentDetail> cd = new ArrayList<CommentDetail>();
-		for (Comment cobj : newComments) {
-			User author=cobj.getUser();
+		for (Comment originalcobj : newComments) {
+			Comment cobj=new Comment();
+			cobj.setCommentid(originalcobj.getCommentid());
+			cobj.setText(originalcobj.getText());
+			cobj.setTime(originalcobj.getTime());
+			User author=new User();
+			author.setUserid(originalcobj.getUser().getUserid());
+			author.setName(originalcobj.getUser().getName());
+			cobj.setUser(author);
 			CommentDetail tmpCd = new CommentDetail();
 			if(isLogged) {
 				History h = new History();
@@ -218,10 +232,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				h.setId(new BigInteger(256,new Random()).toString(16));
 				h.setTime(new Time(System.currentTimeMillis()));
 				hrepository.save(h);
-				h.getUser().setPassword(null);
 			}
 			tmpCd.setCommentInfo(cobj);
-			tmpCd.getCommentInfo().setUser(null);
 			List<Like> likelist=lrepository.findByCID(cobj.getCommentid());
 			tmpCd.setLikes(likelist.size());
 			if(isLogged) {
