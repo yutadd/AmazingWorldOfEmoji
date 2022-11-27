@@ -43,7 +43,6 @@ import com.google.gson.Gson;
 import com.yutadd.model.CommentDetail;
 import com.yutadd.model.EmojiDetail;
 import com.yutadd.model.FileDetail;
-import com.yutadd.model.UserDetail;
 import com.yutadd.model.entity.Comment;
 import com.yutadd.model.entity.Emoji;
 import com.yutadd.model.entity.FileContainer;
@@ -187,6 +186,8 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			}
 			cd.setUsername(urepository.findById(c.getUser().getUserid()).get().getName());
 			cd.setCommentInfo(c);
+			cd.setUserid(c.getUser().getUserid());
+			c.setUser(null);
 			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
@@ -213,18 +214,19 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			if(isLogged) {
 				History h = new History();
 				h.setComment(cobj);
-				user.setPassword(null);
 				h.setUser(user);
 				h.setId(new BigInteger(256,new Random()).toString(16));
 				h.setTime(new Time(System.currentTimeMillis()));
 				hrepository.save(h);
+				h.getUser().setPassword(null);
 			}
 			tmpCd.setCommentInfo(cobj);
+			tmpCd.getCommentInfo().setUser(null);
 			List<Like> likelist=lrepository.findByCID(cobj.getCommentid());
+			tmpCd.setLikes(likelist.size());
 			if(isLogged) {
 				Like l=new Like();
 				l.setComment(cobj);
-				user.setPassword(null);
 				l.setUser(user);
 				if(likelist.contains(l)) {
 					tmpCd.setLiked("true");
@@ -254,6 +256,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 				tmpCd.setFiles(files);
 			}
 			tmpCd.setUsername(author.getName());
+			tmpCd.setUserid(author.getUserid());
 			cd.add(tmpCd);
 		}
 		Gson gson = new Gson();
@@ -328,10 +331,10 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	public ResponseEntity<String> getUser(@RequestParam("uid") String uid) {
 		if (urepository.existsById(uid)) {
 			User user = urepository.findById(uid).get();
-			UserDetail ud = new UserDetail();
-			ud.setName(user.getName());
-			ud.setUid(uid);
-			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(ud));
+			User ret=new User();
+			ret.setName(user.getName());
+			ret.setUserid(user.getUserid());
+			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(ret));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NOT_FOUND");
 		}

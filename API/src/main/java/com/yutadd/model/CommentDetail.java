@@ -11,6 +11,8 @@ import lombok.Setter;
 public class CommentDetail {
 	Comment commentInfo;
 	private String username;
+	private String userid;
 	private FileDetail files;
+	private long likes;
 	private String liked;
 }

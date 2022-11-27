@@ -12,30 +12,13 @@ export default function ShowDetailRight(values: any) {
   console.log(values);
   let name = values.name;
   let json = values.json;
-  let detailYml = json2yaml(json);
-  function json2yaml(detail: JSON): JSX.Element[] {
-    const YAML = require("yaml");
-    const doc = new YAML.Document();
-    doc.contents = detail;
-    let ret: JSX.Element[] = [];
-    let spl: string[] = doc.toString().split("\n");
-    spl.map((e) => {
-      ret.push(
-        <React.Fragment key={e}>
-          {e.replace(" ", "　")}
-          <br />
-        </React.Fragment>
-      );
-    });
-    return ret;
-  }
   function update() {
     fetch(
-      "/api/share/get/comment?cid=" + json["commentInfo"]["commentID"]
+      "/api/share/get/comment?cid=" + json["commentInfo"]["commentid"]
     ).then((e) => {
       e.json().then((newJson) => {
         json = newJson;
-        detailYml = json2yaml(json);
+
         if ("files" in json) {
           if ("file1" in json["files"]) {
             setlength(1);
@@ -58,6 +41,7 @@ export default function ShowDetailRight(values: any) {
     });
   }
   useEffect(() => {
+    update();
     setInterval(() => {
       update();
     }, 5000);
@@ -82,7 +66,7 @@ export default function ShowDetailRight(values: any) {
             }}
             src={
               "/api/share/get/image?uid=" +
-              json["commentInfo"]["userID"] +
+              json["userid"] +
               "&imageName=" +
               pro.link
             }
@@ -102,7 +86,7 @@ export default function ShowDetailRight(values: any) {
       <CardContent sx={{ pb: "0px" }}>
         <Grid width={"90%"} sx={{ my: "0", mx: "1vw" }}>
           <Typography style={{ wordBreak: "break-word" }} className="message">
-            {detailYml}
+            {json["commentInfo"]["text"]}
           </Typography>
         </Grid>
       </CardContent>

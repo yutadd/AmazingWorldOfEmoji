@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
@@ -19,7 +19,7 @@ export default function CommentCard(property: any) {
   const [showMe, setShowMe] = useState(true);
   const [right, setRight] = useContext(Context);
   const [liked, setLiked] = useState(false);
-  const [likes, setlikes] = useState(parseInt(json["commentInfo"]["likes"]));
+  const [likes, setlikes] = useState(parseInt(json["likes"]));
   function postLike(cid: string) {
     console.log(cid);
     fetch("/api/share/post/like?cid=" + cid, { method: "POST" }).then((e) =>
@@ -85,7 +85,7 @@ export default function CommentCard(property: any) {
   const [parsedText, setParsedText] = useState("");
   function update() {
     fetch(
-      "/api/share/get/comment?cid=" + json["commentInfo"]["commentID"]
+      "/api/share/get/comment?cid=" + json["commentInfo"]["commentid"]
     ).then((e) => {
       e.json().then((newJson) => {
         if (newJson.length == 0) {
@@ -97,7 +97,7 @@ export default function CommentCard(property: any) {
           } else {
             setLiked(false);
           }
-          setlikes(parseInt(json["commentInfo"]["likes"]));
+          setlikes(parseInt(json["likes"]));
         }
       });
     });
@@ -119,11 +119,11 @@ export default function CommentCard(property: any) {
   }, []);
   return (
     <Paper
-      key={json["commentInfo"]["commentID"]}
+      key={json["commentInfo"]["commentid"]}
       style={{
         display: showMe ? "block" : "none",
         maxHeight: "50vh",
-        overflowY: "scroll",
+        overflowY: "hidden",
       }}
       sx={{
         mt: "0.8vh", //margin-y 8px
@@ -142,7 +142,7 @@ export default function CommentCard(property: any) {
           ) : (
             <IconButton
               onClick={(e) => {
-                postLike(json["commentInfo"]["commentID"]);
+                postLike(json["commentInfo"]["commentid"]);
               }}
               sx={{ color: purple[500], mt: "1vh" }}
             >
@@ -159,7 +159,7 @@ export default function CommentCard(property: any) {
         </Grid>
         <Grid width={"100%"} sx={{ my: "0", mx: "1vw" }}>
           <p className="name">{name}</p>
-          <p className="user-id">{json["commentInfo"]["userID"]}</p>
+          <p className="user-id">{json["userid"]}</p>
           <Typography
             onClick={() => {
               setRight(<ShowDetailRight name={name} json={json} />);
@@ -178,7 +178,7 @@ export default function CommentCard(property: any) {
           <Grid
             style={{
               maxWidth: "100%",
-              maxHeight: "50vh",
+              maxHeight: "20vh",
               textAlign: "center",
               marginTop: "1vh",
             }}

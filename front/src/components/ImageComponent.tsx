@@ -29,8 +29,8 @@ export default function (props: any) {
       <>
         <Grid
           style={{
-            width: "50%",
-            height: "50%",
+            width: "100%",
+            height: "100%",
             display: "inline-block",
             overflow: "hidden",
           }}
@@ -44,7 +44,7 @@ export default function (props: any) {
             }}
             src={
               "/api/share/get/image?uid=" +
-              json["commentInfo"]["userID"] +
+              json["userid"] +
               "&imageName=" +
               pro.link
             }
@@ -59,7 +59,7 @@ export default function (props: any) {
         style={{
           marginLeft: "auto",
           marginRight: "auto",
-          maxHeight: "50%",
+          maxHeight: "100%",
           maxWidth: "50%",
           overflow: "hidden",
           textAlign: "center",

@@ -1,4 +1,4 @@
-@media screen and (max-aspect-ratio: 13/9) {
+@media screen and (max-aspect-ratio: 8/9) {
   .left {
     display: Block;
     height: 45vh;
@@ -11,7 +11,7 @@
     overflow-y: scroll;
   }
 }
-@media screen and (min-aspect-ratio: 13/9) {
+@media screen and (min-aspect-ratio: 8/9) {
   .left {
     display: inline-block;
     height: 92vh;
