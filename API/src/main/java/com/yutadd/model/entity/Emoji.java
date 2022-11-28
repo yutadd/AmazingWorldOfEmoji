@@ -7,6 +7,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import com.google.gson.annotations.Expose;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -19,12 +21,16 @@ import lombok.Setter;
 public class Emoji {
 	@ManyToOne
 	@JoinColumn(name="userid",referencedColumnName = "userid")
+	@Expose
 	private User user;
 	@NotBlank
+	@Expose
 	private String title;
 	@NotBlank
+	@Expose
 	private String type;
 	@Id
 	@NotBlank
+	@Expose
 	private String path;
 }

@@ -40,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.yutadd.model.CommentDetail;
 import com.yutadd.model.EmojiDetail;
 import com.yutadd.model.FileDetail;
@@ -139,21 +140,14 @@ public class SharedController extends ResponseEntityExceptionHandler {
 	@RequestMapping(value = "/get/comment")
 	@ResponseBody
 	public ResponseEntity<String> getComment(HttpSession session, @RequestParam("cid") String cid) {
-		Comment c=new Comment();
+		Comment c;
 		User senderUser = null;
 		CommentDetail cd = new CommentDetail();
 		if (srepository.existsById(session.getId())) {
 			senderUser = srepository.findById(session.getId()).get().getUser();
 		}
 		if (crepository.existsById(cid)) {
-		Comment originalc = crepository.findById(cid).get();
-		c.setCommentid(originalc.getCommentid());
-		c.setText(originalc.getText());
-		c.setTime(originalc.getTime());
-		User tmpuser=new User();
-		tmpuser.setName(originalc.getUser().getName());
-		tmpuser.setUserid(originalc.getUser().getUserid());
-		c.setUser(tmpuser);
+			c = crepository.findById(cid).get();
 			if (senderUser!=null) {
 				Like l=new Like();
 				l.setComment(c);
@@ -195,7 +189,9 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			cd.setUsername(c.getUser().getName());
 			cd.setCommentInfo(c);
 			cd.setUserid(c.getUser().getUserid());
-			return ResponseEntity.status(HttpStatus.OK).body(new Gson().toJson(cd));
+			return ResponseEntity.status(HttpStatus.OK).body(new GsonBuilder()
+					  .excludeFieldsWithoutExposeAnnotation()
+					  .create().toJson(cd));
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("NO_SUCH_COMMENT");
 		}
@@ -210,35 +206,28 @@ public class SharedController extends ResponseEntityExceptionHandler {
 		if (srepository.existsById(session.getId())) {
 			sessionObj = srepository.findById(session.getId()).get();
 			user= sessionObj.getUser();
-			
+
 			isLogged=true;
 		} 
 		List<Comment> newComments = crepository.findNewComment( Timestamp.valueOf(LocalDateTime.now().minusHours(１)));
 		List<CommentDetail> cd = new ArrayList<CommentDetail>();
 		for (Comment originalcobj : newComments) {
-			Comment cobj=new Comment();
-			cobj.setCommentid(originalcobj.getCommentid());
-			cobj.setText(originalcobj.getText());
-			cobj.setTime(originalcobj.getTime());
-			User author=new User();
-			author.setUserid(originalcobj.getUser().getUserid());
-			author.setName(originalcobj.getUser().getName());
-			cobj.setUser(author);
+			User author=originalcobj.getUser();
 			CommentDetail tmpCd = new CommentDetail();
 			if(isLogged) {
 				History h = new History();
-				h.setComment(cobj);
+				h.setComment(originalcobj);
 				h.setUser(user);
 				h.setId(new BigInteger(256,new Random()).toString(16));
 				h.setTime(new Time(System.currentTimeMillis()));
 				hrepository.save(h);
 			}
-			tmpCd.setCommentInfo(cobj);
-			List<Like> likelist=lrepository.findByCID(cobj.getCommentid());
+			tmpCd.setCommentInfo(originalcobj);
+			List<Like> likelist=lrepository.findByCID(originalcobj.getCommentid());
 			tmpCd.setLikes(likelist.size());
 			if(isLogged) {
 				Like l=new Like();
-				l.setComment(cobj);
+				l.setComment(originalcobj);
 				l.setUser(user);
 				if(likelist.contains(l)) {
 					tmpCd.setLiked("true");
@@ -246,7 +235,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 					tmpCd.setLiked("false");
 				}
 			}
-			FileContainer fc=frepository.findByCommentId(cobj.getCommentid());
+			FileContainer fc=frepository.findByCommentId(originalcobj.getCommentid());
 			if(fc!=null) {
 				FileDetail files=new FileDetail();
 				for(int i=1;i<5;i++) {
@@ -271,9 +260,10 @@ public class SharedController extends ResponseEntityExceptionHandler {
 			tmpCd.setUserid(author.getUserid());
 			cd.add(tmpCd);
 		}
-		Gson gson = new Gson();
-		String json = gson.toJson(cd);
-		return json;
+		
+		return new GsonBuilder()
+				  .excludeFieldsWithoutExposeAnnotation()
+				  .create().toJson(cd);
 	}
 
 	/*yutadd.yeah*/

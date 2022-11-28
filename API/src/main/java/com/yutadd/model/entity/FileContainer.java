@@ -13,6 +13,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import com.google.gson.annotations.Expose;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,17 @@ class FileContainerPK implements Serializable{
 public class FileContainer implements Serializable  {
 	@OneToOne(targetEntity=Comment.class)
     @JoinColumn(name="commentid",referencedColumnName = "commentid")
+	@Expose
     private Comment comment;
 	@Id
+	@Expose
 	String fileid;
+	@Expose
 	String file1;
+	@Expose
 	String file2;
+	@Expose
 	String file3;
+	@Expose
 	String file4;
 }

@@ -19,6 +19,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import com.google.gson.annotations.Expose;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -30,13 +32,17 @@ import lombok.Setter;
 public class Comment implements Comparable<Comment>,Serializable{
 	@ManyToOne
 	@JoinColumn(name="userid",referencedColumnName = "userid")
+	@Expose
 	private User user;
 	@Id
 	@NotBlank
 	@Column(unique=true)
+	@Expose
 	private String commentid;
 	@NotBlank
+	@Expose
 	private String text;
+	@Expose
 	private Timestamp time;
 	@Override
 	public int compareTo(Comment c) {
