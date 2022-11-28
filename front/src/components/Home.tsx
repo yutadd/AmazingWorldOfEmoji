@@ -27,7 +27,7 @@ function Home() {
         let tmp: JSX.Element[] = [...(previous as JSX.Element[])];
         tmp.push(
           <CommentCard
-            key={json[a]["commentInfo"]["commentID"]}
+            key={json[a]["commentInfo"]["commentid"]}
             user={json[a]["username"]}
             json={json[a]}
           />
