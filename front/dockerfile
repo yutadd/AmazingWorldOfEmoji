@@ -1,0 +1,6 @@
+FROM nginx
+COPY build/ /usr/share/nginx/html
+ENTRYPOINT sed -i -e "s#404.html;#404.html;\nlocation /api {\n\tproxy_pass http://api:8080;\n}#g" /etc/nginx/conf.d/default.conf &&\
+/usr/sbin/nginx &&\
+/bin/bash
+   

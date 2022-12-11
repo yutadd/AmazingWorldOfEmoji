@@ -1,0 +1,2 @@
+FROM openjdk
+COPY ./target/AmazingWorldOfEmoji-0.0.1.jar ~/

@@ -8,17 +8,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -27,11 +22,9 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -59,8 +52,6 @@ import com.yutadd.repository.LikeRepository;
 import com.yutadd.repository.SessionRepository;
 import com.yutadd.repository.UserRepository;
 import com.yutadd.service.postCommentService;
-
-import ch.qos.logback.core.encoder.ByteArrayUtil;
 
 @Controller
 @RequestMapping(value = "/api/share/")
@@ -209,7 +200,7 @@ public class SharedController extends ResponseEntityExceptionHandler {
 
 			isLogged=true;
 		} 
-		List<Comment> newComments = crepository.findNewComment( Timestamp.valueOf(LocalDateTime.now().minusHours(１)));
+		List<Comment> newComments = crepository.findNewComment( Timestamp.valueOf(LocalDateTime.now().minusHours(1)));
 		List<CommentDetail> cd = new ArrayList<CommentDetail>();
 		for (Comment originalcobj : newComments) {
 			User author=originalcobj.getUser();

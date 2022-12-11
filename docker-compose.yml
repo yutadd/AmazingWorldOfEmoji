@@ -1,0 +1,42 @@
+version: "3"
+services:
+  postgres:
+    build: postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - PGPASSWORD=postgres
+    networks:
+      emoji-network:
+        ipv4_address: 172.18.0.3
+  api:
+    build: API
+    image: openjdk
+    command: ["java", "-jar", "~/AmazingWorldOfEmoji-0.0.1.jar"]
+    ports:
+      - "8080:8080"
+    networks:
+      emoji-network:
+        ipv4_address: 172.18.0.2
+    depends_on:
+      - postgres
+  front:
+    build: ./front
+    image: nginx
+    ports:
+      - "80:80"
+    tty: true
+    networks:
+      emoji-network:
+        ipv4_address: 172.18.0.4
+    depends_on:
+      - api
+networks:
+  emoji-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16
