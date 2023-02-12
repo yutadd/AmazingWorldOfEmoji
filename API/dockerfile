@@ -1,2 +1,4 @@
-FROM openjdk
-COPY ./target/AmazingWorldOfEmoji-0.0.1.jar ~/
+FROM maven
+COPY ./* /root/api
+WORKDIR /root/api
+ENTRYPOINT ["java", "-jar", "/root/api/target/AmazingWorldOfEmoji-0.0.1.jar"]

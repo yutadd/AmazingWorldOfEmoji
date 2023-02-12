@@ -1,2 +1,3 @@
 FROM postgres
+COPY migrate.sql /docker-entrypoint.d/init.sql
 COPY migrate.sql /docker-entrypoint-initdb.d/init.sql
