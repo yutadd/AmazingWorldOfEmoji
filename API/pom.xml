@@ -87,6 +87,15 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.10.1</version> <!-- この行を追加 -->
+            <configuration>
+                <source>17</source> <!-- この行を追加 -->
+                <target>17</target> <!-- この行を追加 -->
+            </configuration>
+        </plugin>
 		</plugins>
 	</build>
 
